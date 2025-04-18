@@ -21,7 +21,8 @@ body {
     max-width: 400px; /* Фиксированная ширина контейнера */
     width: 90%; /* Адаптивная ширина */
     text-align: center;
-    margin-right: 10%; /* Сдвиг влево для внешней симметрии */
+    margin: 0 20px; /* Равные отступы с обеих сторон */
+    box-sizing: border-box; /* Учёт padding и border в общей ширине */
 }
 
 /* Заголовки */
@@ -89,7 +90,7 @@ button:hover {
 @media (max-width: 768px) {
     .app-container {
         padding: 15px;
-        margin-right: 0; /* На маленьких экранах убираем сдвиг */
+        margin: 0 10px; /* На маленьких экранах уменьшаем отступы */
     }
 
     input, button {
