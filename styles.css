@@ -5,7 +5,7 @@ body {
     font-family: 'Arial', sans-serif;
     height: 100vh;
     display: flex;
-    justify-content: center;
+    justify-content: center; /* Центрирование */
     align-items: center;
     background: #000; /* Чёрный фон */
     color: #fff;
@@ -18,11 +18,11 @@ body {
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6); /* Лёгкая тень */
-    max-width: 400px; /* Фиксированная ширина контейнера */
+    max-width: 400px; /* Фиксированная ширина */
     width: 90%; /* Адаптивная ширина */
     text-align: center;
     margin: 0 auto; /* Центрирование контейнера */
-    box-sizing: border-box; /* Учитываем padding и border в ширине контейнера */
+    box-sizing: border-box; /* Учитываем padding в ширине */
 }
 
 /* Заголовки */
@@ -40,33 +40,34 @@ h1, h2 {
 .game-input {
     display: flex;
     justify-content: space-between;
-    gap: 8px; /* Увеличиваем расстояние между полями */
-    margin-bottom: 12px; /* Уменьшаем отступы между строками */
+    gap: 8px; /* Расстояние между полями ввода */
+    margin-bottom: 12px;
 }
 
 input {
-    flex: 1;
-    padding: 8px; /* Уменьшаем высоту графов */
+    flex: 1; /* Поля ввода занимают равное пространство */
+    max-width: 48%; /* Поля ввода не превышают 48% ширины строки */
+    padding: 8px; /* Высота графов */
     border: none;
     border-radius: 5px;
-    font-size: 14px; /* Уменьшаем размер шрифта */
-    background: #333; /* Тёмный фон для полей ввода */
+    font-size: 14px; /* Размер текста в полях ввода */
+    background: #333; /* Тёмный фон для полей */
     color: #fff; /* Белый текст */
-    text-align: center; /* Центрируем текст внутри поля */
-    box-sizing: border-box; /* Учитываем padding в общей ширине */
+    text-align: center; /* Центрирование текста в поле */
+    box-sizing: border-box; /* Учитываем padding */
 }
 
 /* Кнопки */
 button {
     width: 100%;
-    padding: 12px; /* Уменьшаем высоту кнопок */
+    padding: 12px;
     margin-top: 10px;
     border: none;
     border-radius: 5px;
-    font-size: 14px; /* Уменьшаем размер шрифта */
+    font-size: 14px; /* Размер текста кнопки */
     font-weight: bold;
     color: #fff;
-    background: linear-gradient(135deg, #007bff, #0056b3); /* Градиентная кнопка */
+    background: linear-gradient(135deg, #007bff, #0056b3); /* Градиент кнопки */
     cursor: pointer;
     transition: background-color 0.3s ease;
 }
@@ -94,6 +95,10 @@ button:hover {
     }
 
     input, button {
-        font-size: 12px; /* Уменьшаем размер шрифта на маленьких экранах */
+        font-size: 12px; /* Уменьшаем текст на маленьких экранах */
+    }
+
+    .game-input input {
+        max-width: 45%; /* Поля ввода уменьшаются для адаптации */
     }
 }
