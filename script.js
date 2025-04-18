@@ -3,8 +3,8 @@ document.getElementById("clear-btn").addEventListener("click", clearInputs);
 
 // Добавим слушатели ввода для всех полей коэффициентов
 for (let i = 5; i <= 10; i++) {
-    addInputFormatting(`game-${i}-player1`);
-    addInputFormatting(`game-${i}-player2`);
+    addInputFormatting(`game-${i}-player1`, `game-${i}-player2`);
+    addInputFormatting(`game-${i}-player2`, `game-${i + 1}-player1`);
 }
 
 function analyzeGame() {
@@ -35,6 +35,29 @@ function quickFill(gameId, player1, player2) {
     document.getElementById(`${gameId}-player2`).value = player2.toFixed(2);
 }
 
+// Функция для форматирования ввода в полях с автоматическим переходом
+function addInputFormatting(inputId, nextInputId) {
+    const input = document.getElementById(inputId);
+    input.addEventListener("input", () => {
+        let value = input.value.replace(/[^0-9]/g, ""); // Убираем всё, кроме цифр
+        if (value.length === 0) {
+            input.value = ""; // Если ничего не введено, оставляем поле пустым
+        } else if (value.length === 1) {
+            input.value = value + "."; // Если введена одна цифра, добавляем точку
+        } else if (value.length > 1) {
+            input.value = value.slice(0, 1) + "." + value.slice(1, 3); // Ограничиваем до одной цифры перед точкой и двух после
+        }
+
+        // Если длина ввода достигла 4 символов (формат X.XX), переходим к следующему полю
+        if (input.value.length === 4 && nextInputId) {
+            const nextInput = document.getElementById(nextInputId);
+            if (nextInput) {
+                nextInput.focus();
+            }
+        }
+    });
+}
+
 function analyzeWinner(data) {
     let player1Score = 0;
     let player2Score = 0;
@@ -52,19 +75,4 @@ function analyzeWinner(data) {
     } else {
         return "Игрок 2 доминирует и, скорее всего, победит.";
     }
-}
-
-// Функция для форматирования ввода в полях
-function addInputFormatting(inputId) {
-    const input = document.getElementById(inputId);
-    input.addEventListener("input", () => {
-        let value = input.value.replace(/[^0-9]/g, ""); // Убираем всё, кроме цифр
-        if (value.length === 0) {
-            input.value = ""; // Если ничего не введено, оставляем поле пустым
-        } else if (value.length === 1) {
-            input.value = value + "."; // Если введена одна цифра, добавляем точку
-        } else if (value.length > 1) {
-            input.value = value.slice(0, 1) + "." + value.slice(1, 3); // Ограничиваем до одной цифры перед точкой и двух после
-        }
-    });
 }
