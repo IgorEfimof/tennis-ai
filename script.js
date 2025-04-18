@@ -17,7 +17,7 @@ fields.forEach((fieldId, index) => {
 });
 
 function analyzeGame() {
-    const games = {};
+    const games = [];
     for (let i = 5; i <= 10; i++) {
         const player1 = parseFloat(document.getElementById(`game-${i}-player1`).value);
         const player2 = parseFloat(document.getElementById(`game-${i}-player2`).value);
@@ -27,10 +27,15 @@ function analyzeGame() {
             return;
         }
 
-        games[`game${i}`] = [player1, player2];
+        games.push({
+            game: i,
+            player1,
+            player2,
+            change: Math.abs(player1 - player2) // Разница коэффициентов для анализа устойчивости
+        });
     }
 
-    const result = analyzeWinner(games);
+    const result = analyzeCoefficients(games);
     document.getElementById("result").innerHTML = `<p>${result}</p>`;
 }
 
@@ -61,21 +66,33 @@ function addInputFormatting(inputId, nextInputId) {
     });
 }
 
-function analyzeWinner(data) {
-    let player1Score = 0;
-    let player2Score = 0;
+// Анализ коэффициентов с учётом динамики и устойчивости
+function analyzeCoefficients(games) {
+    let player1TotalCoeff = 0;
+    let player2TotalCoeff = 0;
+    let player1Stability = 0; // Устойчивость коэффициентов
+    let player2Stability = 0;
 
-    Object.values(data).forEach(([player1, player2]) => {
-        if (player1 < player2) {
-            player1Score++;
-        } else {
-            player2Score++;
-        }
+    games.forEach(({ player1, player2, change }) => {
+        player1TotalCoeff += player1;
+        player2TotalCoeff += player2;
+
+        // Устойчивость определяется по амплитуде изменения коэффициентов
+        player1Stability += change;
+        player2Stability += change;
     });
 
-    if (player1Score > player2Score) {
-        return "Игрок 1 доминирует и, скорее всего, победит.";
-    } else {
-        return "Игрок 2 доминирует и, скорее всего, победит.";
-    }
+    // Сравнение коэффициентов и устойчивости
+    const winner = player1TotalCoeff < player2TotalCoeff
+        ? "Игрок 1"
+        : "Игрок 2";
+
+    return `
+        Итоговый анализ:
+        <br>Суммарный коэффициент Игрока 1: ${player1TotalCoeff.toFixed(2)}
+        <br>Суммарный коэффициент Игрока 2: ${player2TotalCoeff.toFixed(2)}
+        <br>Устойчивость Игрока 1: ${player1Stability.toFixed(2)}
+        <br>Устойчивость Игрока 2: ${player2Stability.toFixed(2)}
+        <br><strong>Вероятный победитель: ${winner}</strong>
+    `;
 }
