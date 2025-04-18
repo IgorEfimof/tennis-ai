@@ -5,7 +5,7 @@ body {
     font-family: 'Arial', sans-serif;
     height: 100vh;
     display: flex;
-    justify-content: center; /* Центрируем полностью */
+    justify-content: center;
     align-items: center;
     background: #000; /* Чёрный фон */
     color: #fff;
@@ -21,15 +21,15 @@ body {
     max-width: 400px; /* Фиксированная ширина контейнера */
     width: 90%; /* Адаптивная ширина */
     text-align: center;
-    margin: 0 20px; /* Равные отступы с обеих сторон */
-    box-sizing: border-box; /* Учёт padding и border в общей ширине */
+    margin: 0 auto; /* Центрирование контейнера */
+    box-sizing: border-box; /* Учитываем padding и border в ширине контейнера */
 }
 
 /* Заголовки */
 h1, h2 {
     margin: 0 0 20px;
     color: #ffd700; /* Золотистый цвет для заголовков */
-    font-size: 24px;
+    font-size: 20px;
 }
 
 /* Ввод коэффициентов */
@@ -40,30 +40,30 @@ h1, h2 {
 .game-input {
     display: flex;
     justify-content: space-between;
-    gap: 10px;
-    margin-bottom: 15px; /* Увеличиваем отступы между графами */
+    gap: 8px; /* Увеличиваем расстояние между полями */
+    margin-bottom: 12px; /* Уменьшаем отступы между строками */
 }
 
 input {
     flex: 1;
-    padding: 10px; /* Высота графа */
+    padding: 8px; /* Уменьшаем высоту графов */
     border: none;
     border-radius: 5px;
-    font-size: 16px; /* Размер шрифта */
+    font-size: 14px; /* Уменьшаем размер шрифта */
     background: #333; /* Тёмный фон для полей ввода */
     color: #fff; /* Белый текст */
     text-align: center; /* Центрируем текст внутри поля */
-    box-sizing: border-box; /* Учитываем padding в размерах */
+    box-sizing: border-box; /* Учитываем padding в общей ширине */
 }
 
 /* Кнопки */
 button {
     width: 100%;
-    padding: 15px;
+    padding: 12px; /* Уменьшаем высоту кнопок */
     margin-top: 10px;
     border: none;
     border-radius: 5px;
-    font-size: 16px;
+    font-size: 14px; /* Уменьшаем размер шрифта */
     font-weight: bold;
     color: #fff;
     background: linear-gradient(135deg, #007bff, #0056b3); /* Градиентная кнопка */
@@ -81,7 +81,7 @@ button:hover {
 }
 
 #result p {
-    font-size: 16px;
+    font-size: 14px;
     line-height: 1.5;
     color: #ff4500; /* Оранжевый цвет текста результата */
 }
@@ -90,10 +90,10 @@ button:hover {
 @media (max-width: 768px) {
     .app-container {
         padding: 15px;
-        margin: 0 10px; /* На маленьких экранах уменьшаем отступы */
+        margin: 0 10px; /* Добавляем отступы на маленьких экранах */
     }
 
     input, button {
-        font-size: 14px;
+        font-size: 12px; /* Уменьшаем размер шрифта на маленьких экранах */
     }
 }
