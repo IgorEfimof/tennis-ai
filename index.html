@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Game Analyzer</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <h1>Live Game Analyzer</h1>
+        <div class="input-section">
+            <h2>Введите коэффициенты</h2>
+            <div id="inputs">
+                <div class="game-input">
+                    <label for="game-5">Гейм 5:</label>
+                    <input type="number" id="game-5-player1" placeholder="Игрок 1">
+                    <input type="number" id="game-5-player2" placeholder="Игрок 2">
+                </div>
+                <div class="game-input">
+                    <label for="game-6">Гейм 6:</label>
+                    <input type="number" id="game-6-player1" placeholder="Игрок 1">
+                    <input type="number" id="game-6-player2" placeholder="Игрок 2">
+                </div>
+                <!-- Add more game inputs if needed -->
+            </div>
+            <button id="analyze-btn">Анализировать</button>
+            <button id="clear-btn">Очистить данные</button>
+        </div>
+        <div class="result-section">
+            <h2>Результат анализа</h2>
+            <div id="result">
+                <p>Рекомендации будут здесь.</p>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
