@@ -1,73 +1,96 @@
+/* Общий стиль для страницы */
 body {
-    font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    background-image: url('background.jpg'); /* Фон из вашего изображения */
-    background-size: cover;
-    background-attachment: fixed;
-    background-position: center;
-    color: #fff;
+    font-family: Arial, sans-serif;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: url('background.jpg') no-repeat center center fixed; /* Фон на всю страницу */
+    background-size: cover; /* Масштабируем фон, чтобы он заполнил экран */
+    color: #fff; /* Цвет текста для контраста с фоном */
 }
 
+/* Контейнер приложения */
 .app-container {
-    max-width: 600px;
-    margin: 20px auto;
-    background: rgba(0, 0, 0, 0.8); /* Прозрачный чёрный фон */
+    background: rgba(0, 0, 0, 0.85); /* Прозрачный чёрный фон для читаемости текста */
     padding: 20px;
     border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Лёгкая тень */
+    max-width: 600px;
+    width: 90%; /* Адаптивный размер */
 }
 
+/* Заголовки */
 h1, h2 {
     text-align: center;
-    color: #ffd700; /* Золотой цвет заголовков */
+    margin: 0 0 20px;
+    color: #ffd700; /* Золотистый цвет для выделения заголовков */
 }
 
-.input-section, .result-section {
-    margin: 20px 0;
+/* Секция ввода */
+.input-section {
+    margin-bottom: 20px;
 }
 
 .game-input {
-    margin-bottom: 10px;
     display: flex;
-    justify-content: space-between;
-}
-
-label {
-    flex: 1;
+    gap: 10px;
+    margin-bottom: 10px;
 }
 
 input {
-    flex: 2;
-    margin-left: 10px;
-    padding: 5px;
+    flex: 1;
+    padding: 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
+    font-size: 16px;
     background: #333;
     color: #fff;
 }
 
+/* Кнопки */
 button {
     width: 100%;
     padding: 10px;
     margin-top: 10px;
     border: none;
     border-radius: 5px;
+    font-size: 16px;
     color: #fff;
-    background-color: #007bff;
+    background-color: #007bff; /* Синий цвет кнопки */
     cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 
 button:hover {
-    background-color: #0056b3;
+    background-color: #0056b3; /* Тёмно-синий при наведении */
 }
 
+/* Секция результата */
 .result-section {
-    padding: 10px;
-    border-top: 1px solid #ccc;
+    margin-top: 20px;
+    text-align: center;
 }
 
 #result p {
-    text-align: center;
+    font-size: 18px;
+    line-height: 1.5;
     color: #ff4500; /* Оранжевый цвет текста результата */
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+
+    .app-container {
+        padding: 15px;
+    }
+
+    input, button {
+        font-size: 14px;
+    }
 }
