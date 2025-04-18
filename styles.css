@@ -1,4 +1,4 @@
-/* Убираем отступы и делаем фон на всю страницу */
+/* Убираем белый фон и делаем фон полностью чёрным */
 body {
     margin: 0;
     padding: 0;
@@ -7,25 +7,27 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    background: #121212; /* Тёмный фон */
+    background: #000; /* Чёрный фон */
     color: #fff;
+    overflow: hidden; /* Убираем лишнее прокручивание */
 }
 
 /* Основной контейнер приложения */
 .app-container {
-    background: #1f1f1f; /* Тёмный фон для контейнера */
+    background: #1f1f1f; /* Тёмно-серый фон для контейнера */
     padding: 20px;
     border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4); /* Лёгкая тень */
-    max-width: 500px; /* Увеличиваем ширину для графов */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6); /* Лёгкая тень */
+    max-width: 400px; /* Фиксированная ширина контейнера */
     width: 90%; /* Адаптивная ширина */
+    text-align: center;
 }
 
 /* Заголовки */
 h1, h2 {
-    text-align: center;
     margin: 0 0 20px;
     color: #ffd700; /* Золотистый цвет для заголовков */
+    font-size: 24px;
 }
 
 /* Ввод коэффициентов */
@@ -35,19 +37,21 @@ h1, h2 {
 
 .game-input {
     display: flex;
+    justify-content: space-between;
     gap: 10px;
-    margin-bottom: 15px; /* Увеличиваем расстояние между графами */
+    margin-bottom: 15px; /* Увеличиваем отступы между графами */
 }
 
 input {
     flex: 1;
-    padding: 15px; /* Увеличиваем высоту графа */
+    padding: 10px; /* Высота графа */
     border: none;
     border-radius: 5px;
-    font-size: 18px; /* Увеличиваем размер шрифта */
+    font-size: 16px; /* Размер шрифта */
     background: #333; /* Тёмный фон для полей ввода */
-    color: #fff;
-    text-align: center; /* Центрируем текст в графах */
+    color: #fff; /* Белый текст */
+    text-align: center; /* Центрируем текст внутри поля */
+    box-sizing: border-box; /* Учитываем padding в размерах */
 }
 
 /* Кнопки */
@@ -57,7 +61,7 @@ button {
     margin-top: 10px;
     border: none;
     border-radius: 5px;
-    font-size: 18px;
+    font-size: 16px;
     font-weight: bold;
     color: #fff;
     background: linear-gradient(135deg, #007bff, #0056b3); /* Градиентная кнопка */
@@ -72,11 +76,10 @@ button:hover {
 /* Результаты анализа */
 .result-section {
     margin-top: 20px;
-    text-align: center;
 }
 
 #result p {
-    font-size: 18px;
+    font-size: 16px;
     line-height: 1.5;
     color: #ff4500; /* Оранжевый цвет текста результата */
 }
@@ -88,6 +91,6 @@ button:hover {
     }
 
     input, button {
-        font-size: 16px;
+        font-size: 14px;
     }
 }
