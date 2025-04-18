@@ -15,10 +15,10 @@ body {
 /* Основной контейнер приложения */
 .app-container {
     background: #1f1f1f; /* Тёмно-серый фон для контейнера */
-    padding: 20px;
+    padding: 25px; /* Увеличен padding для удобства */
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6); /* Лёгкая тень */
-    max-width: 400px; /* Фиксированная ширина */
+    max-width: 450px; /* Увеличена ширина контейнера */
     width: 90%; /* Адаптивная ширина */
     text-align: center;
     margin: 0 auto; /* Центрирование контейнера */
@@ -27,44 +27,45 @@ body {
 
 /* Заголовки */
 h1, h2 {
-    margin: 0 0 20px;
+    margin: 0 0 25px;
     color: #ffd700; /* Золотистый цвет для заголовков */
-    font-size: 20px;
+    font-size: 24px; /* Увеличен размер шрифта */
+    font-weight: bold; /* Выделение заголовков */
 }
 
 /* Ввод коэффициентов */
 .input-section {
-    margin-bottom: 20px;
+    margin-bottom: 25px;
 }
 
 .game-input {
     display: flex;
     justify-content: space-between;
     gap: 8px; /* Расстояние между полями ввода */
-    margin-bottom: 12px;
+    margin-bottom: 15px;
 }
 
 input {
     flex: 1; /* Поля ввода занимают равное пространство */
     max-width: 48%; /* Поля ввода не превышают 48% ширины строки */
-    padding: 8px; /* Высота графов */
+    padding: 12px; /* Увеличена высота графов */
     border: none;
     border-radius: 5px;
-    font-size: 14px; /* Размер текста в полях ввода */
+    font-size: 18px; /* Увеличен размер шрифта */
     background: #333; /* Тёмный фон для полей */
     color: #fff; /* Белый текст */
-    text-align: center; /* Центрирование текста в поле */
+    text-align: center; /* Центрация текста в поле */
     box-sizing: border-box; /* Учитываем padding */
 }
 
 /* Кнопки */
 button {
     width: 100%;
-    padding: 12px;
+    padding: 15px;
     margin-top: 10px;
     border: none;
     border-radius: 5px;
-    font-size: 14px; /* Размер текста кнопки */
+    font-size: 18px; /* Увеличен размер текста кнопок */
     font-weight: bold;
     color: #fff;
     background: linear-gradient(135deg, #007bff, #0056b3); /* Градиент кнопки */
@@ -78,27 +79,32 @@ button:hover {
 
 /* Результаты анализа */
 .result-section {
-    margin-top: 20px;
+    margin-top: 25px;
 }
 
 #result p {
-    font-size: 14px;
-    line-height: 1.5;
+    font-size: 18px; /* Увеличен размер текста в результатах */
+    line-height: 1.6;
     color: #ff4500; /* Оранжевый цвет текста результата */
+    font-weight: bold; /* Выделение результатов */
 }
 
 /* Адаптивность */
 @media (max-width: 768px) {
     .app-container {
-        padding: 15px;
+        padding: 20px;
         margin: 0 10px; /* Добавляем отступы на маленьких экранах */
     }
 
     input, button {
-        font-size: 12px; /* Уменьшаем текст на маленьких экранах */
+        font-size: 16px; /* Уменьшен текст на маленьких экранах */
     }
 
     .game-input input {
         max-width: 45%; /* Поля ввода уменьшаются для адаптации */
+    }
+
+    #result p {
+        font-size: 16px; /* Уменьшен текст результатов */
     }
 }
