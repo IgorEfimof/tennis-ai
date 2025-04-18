@@ -1,11 +1,20 @@
 document.getElementById("analyze-btn").addEventListener("click", analyzeGame);
 document.getElementById("clear-btn").addEventListener("click", clearInputs);
 
-// Добавим слушатели ввода для всех полей коэффициентов
-for (let i = 5; i <= 10; i++) {
-    addInputFormatting(`game-${i}-player1`, `game-${i}-player2`);
-    addInputFormatting(`game-${i}-player2`, `game-${i + 1}-player1`);
-}
+// Добавим форматирование и автоматический переход для всех полей ввода
+const fields = [
+    "game-5-player1", "game-5-player2",
+    "game-6-player1", "game-6-player2",
+    "game-7-player1", "game-7-player2",
+    "game-8-player1", "game-8-player2",
+    "game-9-player1", "game-9-player2",
+    "game-10-player1", "game-10-player2"
+];
+
+fields.forEach((fieldId, index) => {
+    const nextFieldId = fields[index + 1]; // Следующее поле
+    addInputFormatting(fieldId, nextFieldId);
+});
 
 function analyzeGame() {
     const games = {};
@@ -30,25 +39,19 @@ function clearInputs() {
     document.getElementById("result").innerHTML = "<p>Рекомендации будут здесь.</p>";
 }
 
-function quickFill(gameId, player1, player2) {
-    document.getElementById(`${gameId}-player1`).value = player1.toFixed(2);
-    document.getElementById(`${gameId}-player2`).value = player2.toFixed(2);
-}
-
-// Функция для форматирования ввода в полях с автоматическим переходом
 function addInputFormatting(inputId, nextInputId) {
     const input = document.getElementById(inputId);
     input.addEventListener("input", () => {
-        let value = input.value.replace(/[^0-9]/g, ""); // Убираем всё, кроме цифр
+        let value = input.value.replace(/[^0-9]/g, ""); // Удаляем всё, кроме цифр
         if (value.length === 0) {
-            input.value = ""; // Если ничего не введено, оставляем поле пустым
+            input.value = ""; // Если поле пустое, ничего не делаем
         } else if (value.length === 1) {
             input.value = value + "."; // Если введена одна цифра, добавляем точку
         } else if (value.length > 1) {
-            input.value = value.slice(0, 1) + "." + value.slice(1, 3); // Ограничиваем до одной цифры перед точкой и двух после
+            input.value = value.slice(0, 1) + "." + value.slice(1, 3); // Форматируем как X.XX
         }
 
-        // Если длина ввода достигла 4 символов (формат X.XX), переходим к следующему полю
+        // Переходим к следующему полю, если длина ввода составляет 4 символа
         if (input.value.length === 4 && nextInputId) {
             const nextInput = document.getElementById(nextInputId);
             if (nextInput) {
