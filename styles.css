@@ -1,35 +1,34 @@
-/* Общий стиль для страницы */
+/* Убираем отступы и делаем фон на всю страницу */
 body {
     margin: 0;
     padding: 0;
-    font-family: Arial, sans-serif;
+    font-family: 'Arial', sans-serif;
     height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    background: url('background.jpg') no-repeat center center fixed; /* Фон на всю страницу */
-    background-size: cover; /* Масштабируем фон, чтобы он заполнил экран */
-    color: #fff; /* Цвет текста для контраста с фоном */
+    background: #121212; /* Тёмный фон */
+    color: #fff;
 }
 
-/* Контейнер приложения */
+/* Основной контейнер приложения */
 .app-container {
-    background: rgba(0, 0, 0, 0.85); /* Прозрачный чёрный фон для читаемости текста */
+    background: #1f1f1f; /* Тёмный фон для контейнера */
     padding: 20px;
     border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Лёгкая тень */
-    max-width: 600px;
-    width: 90%; /* Адаптивный размер */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4); /* Лёгкая тень */
+    max-width: 500px; /* Увеличиваем ширину для графов */
+    width: 90%; /* Адаптивная ширина */
 }
 
 /* Заголовки */
 h1, h2 {
     text-align: center;
     margin: 0 0 20px;
-    color: #ffd700; /* Золотистый цвет для выделения заголовков */
+    color: #ffd700; /* Золотистый цвет для заголовков */
 }
 
-/* Секция ввода */
+/* Ввод коэффициентов */
 .input-section {
     margin-bottom: 20px;
 }
@@ -37,38 +36,40 @@ h1, h2 {
 .game-input {
     display: flex;
     gap: 10px;
-    margin-bottom: 10px;
+    margin-bottom: 15px; /* Увеличиваем расстояние между графами */
 }
 
 input {
     flex: 1;
-    padding: 10px;
-    border: 1px solid #ccc;
+    padding: 15px; /* Увеличиваем высоту графа */
+    border: none;
     border-radius: 5px;
-    font-size: 16px;
-    background: #333;
+    font-size: 18px; /* Увеличиваем размер шрифта */
+    background: #333; /* Тёмный фон для полей ввода */
     color: #fff;
+    text-align: center; /* Центрируем текст в графах */
 }
 
 /* Кнопки */
 button {
     width: 100%;
-    padding: 10px;
+    padding: 15px;
     margin-top: 10px;
     border: none;
     border-radius: 5px;
-    font-size: 16px;
+    font-size: 18px;
+    font-weight: bold;
     color: #fff;
-    background-color: #007bff; /* Синий цвет кнопки */
+    background: linear-gradient(135deg, #007bff, #0056b3); /* Градиентная кнопка */
     cursor: pointer;
     transition: background-color 0.3s ease;
 }
 
 button:hover {
-    background-color: #0056b3; /* Тёмно-синий при наведении */
+    background: linear-gradient(135deg, #0056b3, #003f7f); /* Тёмный градиент при наведении */
 }
 
-/* Секция результата */
+/* Результаты анализа */
 .result-section {
     margin-top: 20px;
     text-align: center;
@@ -82,15 +83,11 @@ button:hover {
 
 /* Адаптивность */
 @media (max-width: 768px) {
-    body {
-        padding: 10px;
-    }
-
     .app-container {
         padding: 15px;
     }
 
     input, button {
-        font-size: 14px;
+        font-size: 16px;
     }
 }
