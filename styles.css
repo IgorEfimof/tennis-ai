@@ -2,13 +2,17 @@ body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f5f5f5;
+    background-image: url('background.jpg'); /* Фон из вашего изображения */
+    background-size: cover;
+    background-attachment: fixed;
+    background-position: center;
+    color: #fff;
 }
 
 .app-container {
     max-width: 600px;
     margin: 20px auto;
-    background: #fff;
+    background: rgba(0, 0, 0, 0.8); /* Прозрачный чёрный фон */
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -16,7 +20,7 @@ body {
 
 h1, h2 {
     text-align: center;
-    color: #333;
+    color: #ffd700; /* Золотой цвет заголовков */
 }
 
 .input-section, .result-section {
@@ -39,6 +43,8 @@ input {
     padding: 5px;
     border: 1px solid #ccc;
     border-radius: 5px;
+    background: #333;
+    color: #fff;
 }
 
 button {
@@ -63,5 +69,5 @@ button:hover {
 
 #result p {
     text-align: center;
-    color: #666;
+    color: #ff4500; /* Оранжевый цвет текста результата */
 }
