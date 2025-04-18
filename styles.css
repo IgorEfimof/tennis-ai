@@ -5,7 +5,7 @@ body {
     font-family: 'Arial', sans-serif;
     height: 100vh;
     display: flex;
-    justify-content: center;
+    justify-content: center; /* Центрируем полностью */
     align-items: center;
     background: #000; /* Чёрный фон */
     color: #fff;
@@ -21,6 +21,7 @@ body {
     max-width: 400px; /* Фиксированная ширина контейнера */
     width: 90%; /* Адаптивная ширина */
     text-align: center;
+    margin-right: 10%; /* Сдвиг влево для внешней симметрии */
 }
 
 /* Заголовки */
@@ -88,6 +89,7 @@ button:hover {
 @media (max-width: 768px) {
     .app-container {
         padding: 15px;
+        margin-right: 0; /* На маленьких экранах убираем сдвиг */
     }
 
     input, button {
