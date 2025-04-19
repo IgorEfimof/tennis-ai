@@ -1,7 +1,7 @@
 document.getElementById("analyze-btn").addEventListener("click", analyzeGame);
 document.getElementById("clear-btn").addEventListener("click", clearInputs);
 
-// Добавим форматирование и автоматический переход для всех полей ввода
+// Форматирование и переход между полями
 const fields = [
     "game-5-player1", "game-5-player2",
     "game-6-player1", "game-6-player2",
@@ -12,7 +12,7 @@ const fields = [
 ];
 
 fields.forEach((fieldId, index) => {
-    const nextFieldId = fields[index + 1]; // Следующее поле
+    const nextFieldId = fields[index + 1];
     addInputFormatting(fieldId, nextFieldId);
 });
 
@@ -31,7 +31,8 @@ function analyzeGame() {
             game: i,
             player1,
             player2,
-            change: Math.abs(player1 - player2) // Разница коэффициентов для анализа устойчивости
+            changePlayer1: i > 5 ? Math.abs(player1 - games[games.length - 1].player1) : 0,
+            changePlayer2: i > 5 ? Math.abs(player2 - games[games.length - 1].player2) : 0
         });
     }
 
@@ -47,16 +48,15 @@ function clearInputs() {
 function addInputFormatting(inputId, nextInputId) {
     const input = document.getElementById(inputId);
     input.addEventListener("input", () => {
-        let value = input.value.replace(/[^0-9]/g, ""); // Удаляем всё, кроме цифр
+        let value = input.value.replace(/[^0-9]/g, "");
         if (value.length === 0) {
-            input.value = ""; // Если поле пустое, ничего не делаем
+            input.value = "";
         } else if (value.length === 1) {
-            input.value = value + "."; // Если введена одна цифра, добавляем точку
+            input.value = value + ".";
         } else if (value.length > 1) {
-            input.value = value.slice(0, 1) + "." + value.slice(1, 3); // Форматируем как X.XX
+            input.value = value.slice(0, 1) + "." + value.slice(1, 3);
         }
 
-        // Переходим к следующему полю, если длина ввода составляет 4 символа
         if (input.value.length === 4 && nextInputId) {
             const nextInput = document.getElementById(nextInputId);
             if (nextInput) {
@@ -66,50 +66,41 @@ function addInputFormatting(inputId, nextInputId) {
     });
 }
 
-// Улучшенный анализ коэффициентов с ИИ
+// Анализ коэффициентов с фокусом на динамику и средние значения
 function analyzeCoefficientsAI(games) {
     let player1TotalCoeff = 0;
     let player2TotalCoeff = 0;
-    let player1Stability = 0; // Устойчивость коэффициентов
-    let player2Stability = 0;
-    let player1Dynamic = 0; // Динамика изменений
-    let player2Dynamic = 0;
+    let player1Dynamic = []; // Динамика изменений Игрока 1
+    let player2Dynamic = []; // Динамика изменений Игрока 2
 
-    games.forEach(({ player1, player2, change }, index) => {
+    games.forEach(({ player1, player2, changePlayer1, changePlayer2 }, index) => {
         player1TotalCoeff += player1;
         player2TotalCoeff += player2;
 
-        // Устойчивость определяется по амплитуде изменения коэффициентов
-        player1Stability += change;
-        player2Stability += change;
-
-        // Динамика: оцениваем изменение коэффициентов между играми
+        // Накапливаем изменения коэффициентов для анализа динамики
         if (index > 0) {
-            const prevGame = games[index - 1];
-            player1Dynamic += Math.abs(player1 - prevGame.player1);
-            player2Dynamic += Math.abs(player2 - prevGame.player2);
+            player1Dynamic.push(changePlayer1);
+            player2Dynamic.push(changePlayer2);
         }
     });
 
-    // Средние коэффициенты
+    // Итоговый "Скоринг" для прогнозирования
     const avgPlayer1Coeff = player1TotalCoeff / games.length;
     const avgPlayer2Coeff = player2TotalCoeff / games.length;
 
-    // Итоговый "Скоринг" для прогнозирования
-    const player1Score = (1 / avgPlayer1Coeff) - (player1Stability * 0.5 + player1Dynamic * 0.3);
-    const player2Score = (1 / avgPlayer2Coeff) - (player2Stability * 0.5 + player2Dynamic * 0.3);
+    const player1Score = (1 / avgPlayer1Coeff) - (player1Dynamic.reduce((sum, change) => sum + change, 0) * 0.3);
+    const player2Score = (1 / avgPlayer2Coeff) - (player2Dynamic.reduce((sum, change) => sum + change, 0) * 0.3);
 
-    // Определяем победителя
+    // Прогнозирование победителя
     const winner = player1Score > player2Score ? "Игрок 1" : "Игрок 2";
 
+    // Вывод результатов
     return `
         Итоговый анализ:
         <br>Средний коэффициент Игрока 1: ${avgPlayer1Coeff.toFixed(2)}
         <br>Средний коэффициент Игрока 2: ${avgPlayer2Coeff.toFixed(2)}
-        <br>Устойчивость Игрока 1: ${player1Stability.toFixed(2)}
-        <br>Устойчивость Игрока 2: ${player2Stability.toFixed(2)}
-        <br>Динамика Игрока 1: ${player1Dynamic.toFixed(2)}
-        <br>Динамика Игрока 2: ${player2Dynamic.toFixed(2)}
+        <br>Динамика изменений Игрока 1: ${player1Dynamic.reduce((sum, change) => sum + change, 0).toFixed(2)}
+        <br>Динамика изменений Игрока 2: ${player2Dynamic.reduce((sum, change) => sum + change, 0).toFixed(2)}
         <br><strong>Вероятный победитель: ${winner}</strong>
     `;
 }
