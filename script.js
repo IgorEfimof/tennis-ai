@@ -35,7 +35,7 @@ function analyzeGame() {
         });
     }
 
-    const result = analyzeCoefficients(games);
+    const result = analyzeCoefficientsAI(games);
     document.getElementById("result").innerHTML = `<p>${result}</p>`;
 }
 
@@ -66,33 +66,50 @@ function addInputFormatting(inputId, nextInputId) {
     });
 }
 
-// Анализ коэффициентов с учётом динамики и устойчивости
-function analyzeCoefficients(games) {
+// Улучшенный анализ коэффициентов с ИИ
+function analyzeCoefficientsAI(games) {
     let player1TotalCoeff = 0;
     let player2TotalCoeff = 0;
     let player1Stability = 0; // Устойчивость коэффициентов
     let player2Stability = 0;
+    let player1Dynamic = 0; // Динамика изменений
+    let player2Dynamic = 0;
 
-    games.forEach(({ player1, player2, change }) => {
+    games.forEach(({ player1, player2, change }, index) => {
         player1TotalCoeff += player1;
         player2TotalCoeff += player2;
 
         // Устойчивость определяется по амплитуде изменения коэффициентов
         player1Stability += change;
         player2Stability += change;
+
+        // Динамика: оцениваем изменение коэффициентов между играми
+        if (index > 0) {
+            const prevGame = games[index - 1];
+            player1Dynamic += Math.abs(player1 - prevGame.player1);
+            player2Dynamic += Math.abs(player2 - prevGame.player2);
+        }
     });
 
-    // Сравнение коэффициентов и устойчивости
-    const winner = player1TotalCoeff < player2TotalCoeff
-        ? "Игрок 1"
-        : "Игрок 2";
+    // Средние коэффициенты
+    const avgPlayer1Coeff = player1TotalCoeff / games.length;
+    const avgPlayer2Coeff = player2TotalCoeff / games.length;
+
+    // Итоговый "Скоринг" для прогнозирования
+    const player1Score = (1 / avgPlayer1Coeff) - (player1Stability * 0.5 + player1Dynamic * 0.3);
+    const player2Score = (1 / avgPlayer2Coeff) - (player2Stability * 0.5 + player2Dynamic * 0.3);
+
+    // Определяем победителя
+    const winner = player1Score > player2Score ? "Игрок 1" : "Игрок 2";
 
     return `
         Итоговый анализ:
-        <br>Суммарный коэффициент Игрока 1: ${player1TotalCoeff.toFixed(2)}
-        <br>Суммарный коэффициент Игрока 2: ${player2TotalCoeff.toFixed(2)}
+        <br>Средний коэффициент Игрока 1: ${avgPlayer1Coeff.toFixed(2)}
+        <br>Средний коэффициент Игрока 2: ${avgPlayer2Coeff.toFixed(2)}
         <br>Устойчивость Игрока 1: ${player1Stability.toFixed(2)}
         <br>Устойчивость Игрока 2: ${player2Stability.toFixed(2)}
+        <br>Динамика Игрока 1: ${player1Dynamic.toFixed(2)}
+        <br>Динамика Игрока 2: ${player2Dynamic.toFixed(2)}
         <br><strong>Вероятный победитель: ${winner}</strong>
     `;
 }
