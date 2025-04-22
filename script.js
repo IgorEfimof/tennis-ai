@@ -1,5 +1,8 @@
 document.getElementById("analyze-btn").addEventListener("click", analyzeGame);
 document.getElementById("clear-btn").addEventListener("click", clearInputs);
+document.getElementById("history-btn").addEventListener("click", () => {
+    window.location.href = "history.html";
+});
 
 // Форматирование и переход между полями
 const fields = [
@@ -34,8 +37,14 @@ function analyzeGame() {
         });
     }
 
-    const result = analyzeCoefficientsAI(games);
-    document.getElementById("result").innerHTML = `<p>${result}</p>`;
+    const resultHTML = analyzeCoefficientsAI(games);
+    document.getElementById("result").innerHTML = `<p>${resultHTML}</p>`;
+
+    saveToHistory({
+        timestamp: new Date().toLocaleString(),
+        games,
+        result: resultHTML
+    });
 }
 
 function clearInputs() {
@@ -64,7 +73,6 @@ function addInputFormatting(inputId, nextInputId) {
     });
 }
 
-// Обновлённый AI-анализ с учётом value, ROI и падения коэффициента
 function analyzeCoefficientsAI(games) {
     let player1Sum = 0;
     let player2Sum = 0;
@@ -102,7 +110,6 @@ function analyzeCoefficientsAI(games) {
     const fairCoeffP1 = 1 / scoreP1;
     const fairCoeffP2 = 1 / scoreP2;
 
-    // ROI расчёт
     const roiP1 = ((avgP1 - fairCoeffP1) / fairCoeffP1) * 100;
     const roiP2 = ((avgP2 - fairCoeffP2) / fairCoeffP2) * 100;
 
@@ -127,5 +134,12 @@ function analyzeCoefficientsAI(games) {
         <strong>${recommendation}</strong>
     `;
 }
+
+// Сохраняем историю анализов в localStorage
+function saveToHistory(entry) {
+    const history = JSON.parse(localStorage.getItem("analysisHistory") || "[]");
+    history.unshift(entry); // добавляем в начало
+    localStorage.setItem("analysisHistory", JSON.stringify(history.slice(0, 50
+
 
 
