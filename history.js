@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", function() {
             const div = document.createElement("div");
             div.innerHTML = `
                 <strong>Анализ от ${entry.timestamp}</strong><br>
-                <p>${entry.analysisData}</p><br>
+                ${entry.resultHTML}<br><br>
             `;
             historyContent.appendChild(div);
         });
@@ -24,10 +24,10 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
     // Функция для сохранения нового анализа
-    function saveAnalysis(analysisData) {
+    function saveAnalysis(resultHTML) {
         const newEntry = {
             timestamp: new Date().toLocaleString(),
-            analysisData: analysisData
+            resultHTML: resultHTML
         };
         const currentHistory = JSON.parse(localStorage.getItem("analysisHistory")) || [];
         currentHistory.push(newEntry);
@@ -35,17 +35,15 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     // Пример вызова функции сохранения
+    // Вы можете удалить или адаптировать этот пример в зависимости от вашего сценария использования
     document.getElementById("save-analysis-btn")?.addEventListener("click", () => {
-        const resultElement = document.getElementById("result");
-        const analysisData = resultElement ? resultElement.innerHTML : "Нет данных для анализа";
-
-        saveAnalysis(analysisData);
-
+        const resultHTML = "<p>Результат нового анализа</p>"; // Здесь должен быть результат анализа
+        saveAnalysis(resultHTML);
         // Обновляем отображение истории после добавления нового анализа
         const div = document.createElement("div");
         div.innerHTML = `
             <strong>Анализ от ${new Date().toLocaleString()}</strong><br>
-            <p>${analysisData}</p><br>
+            ${resultHTML}<br><br>
         `;
         historyContent.prepend(div); // Добавляем новый элемент в начало
     });
