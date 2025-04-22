@@ -5,29 +5,23 @@ document.addEventListener("DOMContentLoaded", function() {
     const history = JSON.parse(localStorage.getItem("analysisHistory")) || [];
 
     // Отображение истории
-    function renderHistory() {
-        historyContent.innerHTML = ""; // Очищаем содержимое перед обновлением
-        if (history.length === 0) {
-            historyContent.innerHTML = "<p>История пуста.</p>";
-        } else {
-            history.slice().reverse().forEach(entry => {
-                const div = document.createElement("div");
-                div.innerHTML = `
-                    <strong>Анализ от ${entry.timestamp}</strong><br>
-                    <p>${entry.analysisData || "Нет данных для анализа"}</p><br>
-                `;
-                historyContent.appendChild(div);
-            });
-        }
+    if (history.length === 0) {
+        historyContent.innerHTML = "<p>История пуста.</p>";
+    } else {
+        history.reverse().forEach(entry => {
+            const div = document.createElement("div");
+            div.innerHTML = `
+                <strong>Анализ от ${entry.timestamp}</strong><br>
+                <p>${entry.analysisData || "Нет данных для анализа"}</p><br>
+            `;
+            historyContent.appendChild(div);
+        });
     }
-
-    renderHistory();
 
     // Очистка истории
     document.getElementById("clear-history-btn").addEventListener("click", () => {
         localStorage.removeItem("analysisHistory");
-        history.length = 0; // Очищаем текущий массив истории
-        renderHistory();
+        historyContent.innerHTML = "<p>История была очищена.</p>";
     });
 
     // Функция для сохранения нового анализа
@@ -36,20 +30,24 @@ document.addEventListener("DOMContentLoaded", function() {
             timestamp: new Date().toLocaleString(),
             analysisData: analysisData
         };
-        history.push(newEntry); // Добавляем запись в локальный массив
-        localStorage.setItem("analysisHistory", JSON.stringify(history)); // Сохраняем в localStorage
-        renderHistory(); // Обновляем отображение после сохранения
+        const currentHistory = JSON.parse(localStorage.getItem("analysisHistory")) || [];
+        currentHistory.push(newEntry);
+        localStorage.setItem("analysisHistory", JSON.stringify(currentHistory));
     }
 
     // Пример вызова функции сохранения
     document.getElementById("save-analysis-btn")?.addEventListener("click", () => {
         const resultElement = document.getElementById("result");
-        const analysisData = resultElement ? resultElement.innerText.trim() : "Нет данных для анализа";
+        const analysisData = resultElement ? resultElement.innerText : "Нет данных для анализа";
 
-        if (analysisData && analysisData !== "Нет данных для анализа") {
-            saveAnalysis(analysisData);
-        } else {
-            alert("Нет данных для сохранения анализа!");
-        }
+        saveAnalysis(analysisData);
+
+        // Обновляем отображение истории после добавления нового анализа
+        const div = document.createElement("div");
+        div.innerHTML = `
+            <strong>Анализ от ${new Date().toLocaleString()}</strong><br>
+            <p>${analysisData}</p><br>
+        `;
+        historyContent.prepend(div); // Добавляем новый элемент в начало
     });
 });
