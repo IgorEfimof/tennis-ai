@@ -4,7 +4,6 @@ document.addEventListener("DOMContentLoaded", function() {
     // Получаем историю из localStorage
     const history = JSON.parse(localStorage.getItem("analysisHistory")) || [];
 
-    // Отображение истории
     if (history.length === 0) {
         historyContent.innerHTML = "<p>История пуста.</p>";
     } else {
@@ -12,7 +11,7 @@ document.addEventListener("DOMContentLoaded", function() {
             const div = document.createElement("div");
             div.innerHTML = `
                 <strong>Анализ от ${entry.timestamp}</strong><br>
-                <p>${entry.analysisData || "Нет данных для анализа"}</p><br>
+                <p>${entry.analysisData}</p><br>
             `;
             historyContent.appendChild(div);
         });
@@ -38,7 +37,7 @@ document.addEventListener("DOMContentLoaded", function() {
     // Пример вызова функции сохранения
     document.getElementById("save-analysis-btn")?.addEventListener("click", () => {
         const resultElement = document.getElementById("result");
-        const analysisData = resultElement ? resultElement.innerText : "Нет данных для анализа";
+        const analysisData = resultElement ? resultElement.innerHTML : "Нет данных для анализа";
 
         saveAnalysis(analysisData);
 
