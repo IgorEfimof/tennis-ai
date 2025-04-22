@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", function() {
             const div = document.createElement("div");
             div.innerHTML = `
                 <strong>Анализ от ${entry.timestamp}</strong><br>
-                ${entry.resultHTML}<br><br>
+                <p>${entry.resultHTML}</p><br>
             `;
             historyContent.appendChild(div);
         });
@@ -35,15 +35,18 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     // Пример вызова функции сохранения
-    // Вы можете удалить или адаптировать этот пример в зависимости от вашего сценария использования
     document.getElementById("save-analysis-btn")?.addEventListener("click", () => {
-        const resultHTML = "<p>Результат нового анализа</p>"; // Здесь должен быть результат анализа
+        // Получаем текст анализа из элемента с ID "result"
+        const resultElement = document.getElementById("result");
+        const resultHTML = resultElement ? resultElement.innerHTML : "Нет данных для анализа";
+
         saveAnalysis(resultHTML);
+
         // Обновляем отображение истории после добавления нового анализа
         const div = document.createElement("div");
         div.innerHTML = `
             <strong>Анализ от ${new Date().toLocaleString()}</strong><br>
-            ${resultHTML}<br><br>
+            <p>${resultHTML}</p><br>
         `;
         historyContent.prepend(div); // Добавляем новый элемент в начало
     });
