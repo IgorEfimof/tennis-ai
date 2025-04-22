@@ -1,8 +1,5 @@
 document.getElementById("analyze-btn").addEventListener("click", analyzeGame);
 document.getElementById("clear-btn").addEventListener("click", clearInputs);
-document.getElementById("history-btn").addEventListener("click", () => {
-    window.location.href = "history.html";
-});
 
 // Форматирование и переход между полями
 const fields = [
@@ -22,8 +19,8 @@ fields.forEach((fieldId, index) => {
 function analyzeGame() {
     const games = [];
     for (let i = 5; i <= 10; i++) {
-        const player1 = parseFloat(document.getElementById(`game-${i}-player1`).value);
-        const player2 = parseFloat(document.getElementById(`game-${i}-player2`).value);
+        const player1 = parseFloat(document.getElementById(game-${i}-player1).value);
+        const player2 = parseFloat(document.getElementById(game-${i}-player2).value);
 
         if (isNaN(player1) || isNaN(player2)) {
             document.getElementById("result").innerHTML = "<p>Пожалуйста, введите все коэффициенты для игр.</p>";
@@ -37,14 +34,8 @@ function analyzeGame() {
         });
     }
 
-    const resultHTML = analyzeCoefficientsAI(games);
-    document.getElementById("result").innerHTML = `<p>${resultHTML}</p>`;
-
-    saveToHistory({
-        timestamp: new Date().toLocaleString(),
-        games,
-        result: resultHTML
-    });
+    const result = analyzeCoefficientsAI(games);
+    document.getElementById("result").innerHTML = <p>${result}</p>;
 }
 
 function clearInputs() {
@@ -73,6 +64,7 @@ function addInputFormatting(inputId, nextInputId) {
     });
 }
 
+// Обновлённый AI-анализ с учётом value, ROI и падения коэффициента
 function analyzeCoefficientsAI(games) {
     let player1Sum = 0;
     let player2Sum = 0;
@@ -110,19 +102,20 @@ function analyzeCoefficientsAI(games) {
     const fairCoeffP1 = 1 / scoreP1;
     const fairCoeffP2 = 1 / scoreP2;
 
+    // ROI расчёт
     const roiP1 = ((avgP1 - fairCoeffP1) / fairCoeffP1) * 100;
     const roiP2 = ((avgP2 - fairCoeffP2) / fairCoeffP2) * 100;
 
     let recommendation = "";
     if (avgP1 > fairCoeffP1 && roiP1 > 5) {
-        recommendation = `🟢 Value-ставка на Игрока 1 — ROI: ${roiP1.toFixed(2)}%`;
+        recommendation = 🟢 Value-ставка на Игрока 1 — ROI: ${roiP1.toFixed(2)}%;
     } else if (avgP2 > fairCoeffP2 && roiP2 > 5) {
-        recommendation = `🟢 Value-ставка на Игрока 2 — ROI: ${roiP2.toFixed(2)}%`;
+        recommendation = 🟢 Value-ставка на Игрока 2 — ROI: ${roiP2.toFixed(2)}%;
     } else {
-        recommendation = `⚪️ Явной value-ставки не найдено. Лучше не рисковать.`;
+        recommendation = ⚪️ Явной value-ставки не найдено. Лучше не рисковать.;
     }
 
-    return `
+    return 
         <strong>Средние коэффициенты:</strong><br>
         Игрок 1: ${avgP1.toFixed(2)} | Игрок 2: ${avgP2.toFixed(2)}<br>
         <strong>Имплайд-вероятности с поправкой:</strong><br>
@@ -132,14 +125,8 @@ function analyzeCoefficientsAI(games) {
         <strong>Ожидаемый ROI:</strong><br>
         Игрок 1: ${roiP1.toFixed(2)}% | Игрок 2: ${roiP2.toFixed(2)}%<br><br>
         <strong>${recommendation}</strong>
-    `;
+    ;
 }
-
-// Сохраняем историю анализов в localStorage
-function saveToHistory(entry) {
-    const history = JSON.parse(localStorage.getItem("analysisHistory") || "[]");
-    history.unshift(entry); // добавляем в начало
-    localStorage.setItem("analysisHistory", JSON.stringify(history.slice(0, 50
 
 
 
