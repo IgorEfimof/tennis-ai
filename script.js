@@ -30,9 +30,7 @@ function analyzeGame() {
         games.push({
             game: i,
             player1,
-            player2,
-            changePlayer1: i > 5 ? Math.abs(player1 - games[games.length - 1].player1) : 0,
-            changePlayer2: i > 5 ? Math.abs(player2 - games[games.length - 1].player2) : 0
+            player2
         });
     }
 
@@ -66,41 +64,61 @@ function addInputFormatting(inputId, nextInputId) {
     });
 }
 
-// Анализ коэффициентов с фокусом на динамику и средние значения
+// Обновлённый AI-анализ с учётом value и падения коэффициента
 function analyzeCoefficientsAI(games) {
-    let player1TotalCoeff = 0;
-    let player2TotalCoeff = 0;
-    let player1Dynamic = []; // Динамика изменений Игрока 1
-    let player2Dynamic = []; // Динамика изменений Игрока 2
+    let player1Sum = 0;
+    let player2Sum = 0;
+    let player1Drop = 0;
+    let player2Drop = 0;
 
-    games.forEach(({ player1, player2, changePlayer1, changePlayer2 }, index) => {
-        player1TotalCoeff += player1;
-        player2TotalCoeff += player2;
+    for (let i = 0; i < games.length; i++) {
+        const { player1, player2 } = games[i];
+        player1Sum += player1;
+        player2Sum += player2;
 
-        // Накапливаем изменения коэффициентов для анализа динамики
-        if (index > 0) {
-            player1Dynamic.push(changePlayer1);
-            player2Dynamic.push(changePlayer2);
+        if (i > 0) {
+            const prev = games[i - 1];
+            player1Drop += prev.player1 - player1;
+            player2Drop += prev.player2 - player2;
         }
-    });
+    }
 
-    // Итоговый "Скоринг" для прогнозирования
-    const avgPlayer1Coeff = player1TotalCoeff / games.length;
-    const avgPlayer2Coeff = player2TotalCoeff / games.length;
+    const avgP1 = player1Sum / games.length;
+    const avgP2 = player2Sum / games.length;
 
-    const player1Score = (1 / avgPlayer1Coeff) - (player1Dynamic.reduce((sum, change) => sum + change, 0) * 0.3);
-    const player2Score = (1 / avgPlayer2Coeff) - (player2Dynamic.reduce((sum, change) => sum + change, 0) * 0.3);
+    let impP1 = 1 / avgP1;
+    let impP2 = 1 / avgP2;
+    const totalImp = impP1 + impP2;
 
-    // Прогнозирование победителя
-    const winner = player1Score > player2Score ? "Игрок 1" : "Игрок 2";
+    impP1 /= totalImp;
+    impP2 /= totalImp;
 
-    // Вывод результатов
+    const dropBonus1 = Math.max(0, player1Drop) * 0.05;
+    const dropBonus2 = Math.max(0, player2Drop) * 0.05;
+
+    const scoreP1 = impP1 + dropBonus1;
+    const scoreP2 = impP2 + dropBonus2;
+
+    const fairCoeffP1 = 1 / scoreP1;
+    const fairCoeffP2 = 1 / scoreP2;
+
+    let recommendation = "";
+    if (avgP1 > fairCoeffP1 && (avgP1 - fairCoeffP1) / fairCoeffP1 > 0.05) {
+        recommendation = `🟢 Value-ставка на Игрока 1 — шансы выше, чем предполагает букмекер.`;
+    } else if (avgP2 > fairCoeffP2 && (avgP2 - fairCoeffP2) / fairCoeffP2 > 0.05) {
+        recommendation = `🟢 Value-ставка на Игрока 2 — шансы выше, чем предполагает букмекер.`;
+    } else {
+        recommendation = `⚪️ Явной value-ставки не найдено. Лучше не рисковать.`;
+    }
+
     return `
-        Итоговый анализ:
-        <br>Средний коэффициент Игрока 1: ${avgPlayer1Coeff.toFixed(2)}
-        <br>Средний коэффициент Игрока 2: ${avgPlayer2Coeff.toFixed(2)}
-        <br>Динамика изменений Игрока 1: ${player1Dynamic.reduce((sum, change) => sum + change, 0).toFixed(2)}
-        <br>Динамика изменений Игрока 2: ${player2Dynamic.reduce((sum, change) => sum + change, 0).toFixed(2)}
-        <br><strong>Вероятный победитель: ${winner}</strong>
+        <strong>Средние коэффициенты:</strong><br>
+        Игрок 1: ${avgP1.toFixed(2)} | Игрок 2: ${avgP2.toFixed(2)}<br>
+        <strong>Имплайд-вероятности с поправкой:</strong><br>
+        Игрок 1: ${(scoreP1 * 100).toFixed(1)}% | Игрок 2: ${(scoreP2 * 100).toFixed(1)}%<br>
+        <strong>Value-коэффициенты (справедливые):</strong><br>
+        Игрок 1: ${fairCoeffP1.toFixed(2)} | Игрок 2: ${fairCoeffP2.toFixed(2)}<br><br>
+        <strong>${recommendation}</strong>
     `;
 }
+
