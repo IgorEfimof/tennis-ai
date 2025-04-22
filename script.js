@@ -64,7 +64,7 @@ function addInputFormatting(inputId, nextInputId) {
     });
 }
 
-// Обновлённый AI-анализ с учётом value, ROI и падения коэффициента
+// Обновлённый AI-анализ с учётом value и падения коэффициента
 function analyzeCoefficientsAI(games) {
     let player1Sum = 0;
     let player2Sum = 0;
@@ -102,15 +102,11 @@ function analyzeCoefficientsAI(games) {
     const fairCoeffP1 = 1 / scoreP1;
     const fairCoeffP2 = 1 / scoreP2;
 
-    // ROI расчёт
-    const roiP1 = ((avgP1 - fairCoeffP1) / fairCoeffP1) * 100;
-    const roiP2 = ((avgP2 - fairCoeffP2) / fairCoeffP2) * 100;
-
     let recommendation = "";
-    if (avgP1 > fairCoeffP1 && roiP1 > 5) {
-        recommendation = `🟢 Value-ставка на Игрока 1 — ROI: ${roiP1.toFixed(2)}%`;
-    } else if (avgP2 > fairCoeffP2 && roiP2 > 5) {
-        recommendation = `🟢 Value-ставка на Игрока 2 — ROI: ${roiP2.toFixed(2)}%`;
+    if (avgP1 > fairCoeffP1 && (avgP1 - fairCoeffP1) / fairCoeffP1 > 0.05) {
+        recommendation = `🟢 Value-ставка на Игрока 1 — шансы выше, чем предполагает букмекер.`;
+    } else if (avgP2 > fairCoeffP2 && (avgP2 - fairCoeffP2) / fairCoeffP2 > 0.05) {
+        recommendation = `🟢 Value-ставка на Игрока 2 — шансы выше, чем предполагает букмекер.`;
     } else {
         recommendation = `⚪️ Явной value-ставки не найдено. Лучше не рисковать.`;
     }
@@ -121,12 +117,11 @@ function analyzeCoefficientsAI(games) {
         <strong>Имплайд-вероятности с поправкой:</strong><br>
         Игрок 1: ${(scoreP1 * 100).toFixed(1)}% | Игрок 2: ${(scoreP2 * 100).toFixed(1)}%<br>
         <strong>Value-коэффициенты (справедливые):</strong><br>
-        Игрок 1: ${fairCoeffP1.toFixed(2)} | Игрок 2: ${fairCoeffP2.toFixed(2)}<br>
-        <strong>Ожидаемый ROI:</strong><br>
-        Игрок 1: ${roiP1.toFixed(2)}% | Игрок 2: ${roiP2.toFixed(2)}%<br><br>
+        Игрок 1: ${fairCoeffP1.toFixed(2)} | Игрок 2: ${fairCoeffP2.toFixed(2)}<br><br>
         <strong>${recommendation}</strong>
     `;
 }
+
 
 
 
