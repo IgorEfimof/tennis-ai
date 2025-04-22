@@ -4,20 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>История анализов</title>
+    <link rel="stylesheet" href="styles.css"> <!-- Подключение стилей -->
 </head>
 <body>
-    <h1>История анализов</h1>
-    <div id="history-content"></div>
-    
-    <!-- Кнопка для очистки истории -->
-    <button id="clear-history-btn">Очистить историю</button>
+    <div class="app-container"> <!-- Используем общий контейнер для стилизации -->
+        <h1>История анализов</h1>
+        <div id="history-content"></div>
+        
+        <!-- Кнопка для очистки истории -->
+        <button id="clear-history-btn">Очистить историю</button>
 
-    <!-- Кнопка для сохранения нового анализа -->
-    <button id="save-analysis-btn">Сохранить новый анализ</button>
+        <!-- Кнопка для сохранения нового анализа -->
+        <button id="save-analysis-btn">Сохранить новый анализ</button>
 
-    <!-- Кнопка для возврата на главную -->
-    <button onclick="window.location.href='index.html'">Назад</button>
-
+        <!-- Кнопка для возврата на главную -->
+        <button onclick="window.location.href='index.html'">Назад</button>
+    </div>
     <script src="history.js"></script>
 </body>
 </html>
