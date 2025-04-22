@@ -4,22 +4,49 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>История анализов</title>
-    <link rel="stylesheet" href="styles.css"> <!-- Подключение стилей -->
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="app-container"> <!-- Используем общий контейнер для стилизации -->
+    <div class="app-container">
         <h1>История анализов</h1>
-        <div id="history-content"></div>
         
-        <!-- Кнопка для очистки истории -->
-        <button id="clear-history-btn">Очистить историю</button>
+        <div id="history-content">
+            <p>Загрузка...</p>
+        </div>
 
-        <!-- Кнопка для сохранения нового анализа -->
-        <button id="save-analysis-btn">Сохранить новый анализ</button>
-
-        <!-- Кнопка для возврата на главную -->
-        <button onclick="window.location.href='index.html'">Назад</button>
+        <div class="button-group" style="margin-top: 20px;">
+            <button id="clear-history-btn">🗑 Очистить историю</button>
+            <button onclick="window.location.href='index.html'">⬅ Назад</button>
+        </div>
     </div>
-    <script src="history.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const historyContent = document.getElementById("history-content");
+            const history = JSON.parse(localStorage.getItem("analysisHistory")) || [];
+
+            if (history.length === 0) {
+                historyContent.innerHTML = "<p>История пуста.</p>";
+            } else {
+                history.reverse().forEach(entry => {
+                    const div = document.createElement("div");
+                    div.classList.add("history-entry");
+                    div.style.marginBottom = "20px";
+                    div.innerHTML = `
+                        <strong>Анализ от ${entry.timestamp}</strong><br>
+                        <div class="history-result">${entry.result || "Нет данных"}</div>
+                        <hr>
+                    `;
+                    historyContent.appendChild(div);
+                });
+            }
+
+            document.getElementById("clear-history-btn").addEventListener("click", () => {
+                localStorage.removeItem("analysisHistory");
+                historyContent.innerHTML = "<p>История была очищена.</p>";
+            });
+        });
+    </script>
 </body>
 </html>
+
