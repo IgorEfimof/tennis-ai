@@ -1,56 +1,26 @@
-document.addEventListener("DOMContentLoaded", function() {
-    const historyContent = document.getElementById("history-content");
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>История анализов</title>
+    <link rel="stylesheet" href="styles.css"> <!-- Подключение стилей -->
+</head>
+<body>
+    <div class="app-container"> <!-- Используем общий контейнер для стилизации -->
+        <h1>История анализов</h1>
+        <div id="history-content"></div>
+        
+        <!-- Кнопка для очистки истории -->
+        <button id="clear-history-btn">Очистить историю</button>
 
-    // Получаем историю из localStorage
-    const history = JSON.parse(localStorage.getItem("analysisHistory")) || [];
+        <!-- Кнопка для сохранения нового анализа -->
+        <button id="save-analysis-btn">Сохранить новый анализ</button>
 
-    // Отображение истории
-    function renderHistory() {
-        historyContent.innerHTML = ""; // Очищаем содержимое перед обновлением
-        if (history.length === 0) {
-            historyContent.innerHTML = "<p>История пуста.</p>";
-        } else {
-            history.slice().reverse().forEach(entry => {
-                const div = document.createElement("div");
-                div.innerHTML = `
-                    <strong>Анализ от ${entry.timestamp}</strong><br>
-                    <p>${entry.analysisData || "Нет данных для анализа"}</p><br>
-                `;
-                historyContent.appendChild(div);
-            });
-        }
-    }
-
-    renderHistory();
-
-    // Очистка истории
-    document.getElementById("clear-history-btn").addEventListener("click", () => {
-        localStorage.removeItem("analysisHistory");
-        history.length = 0; // Очищаем текущий массив истории
-        renderHistory();
-    });
-
-    // Функция для сохранения нового анализа
-    function saveAnalysis(analysisData) {
-        const newEntry = {
-            timestamp: new Date().toLocaleString(),
-            analysisData: analysisData
-        };
-        history.push(newEntry); // Добавляем запись в локальный массив
-        localStorage.setItem("analysisHistory", JSON.stringify(history)); // Сохраняем в localStorage
-        renderHistory(); // Обновляем отображение после сохранения
-    }
-
-    // Пример вызова функции сохранения
-    document.getElementById("save-analysis-btn")?.addEventListener("click", () => {
-        const resultElement = document.getElementById("result");
-        const analysisData = resultElement ? resultElement.innerText.trim() : "Нет данных для анализа";
-
-        if (analysisData && analysisData !== "Нет данных для анализа") {
-            saveAnalysis(analysisData);
-        } else {
-            alert("Нет данных для сохранения анализа!");
-        }
-    });
-});
+        <!-- Кнопка для возврата на главную -->
+        <button onclick="window.location.href='index.html'">Назад</button>
+    </div>
+    <script src="history.js"></script>
+</body>
+</html>
 
