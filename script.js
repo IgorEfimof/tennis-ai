@@ -37,8 +37,8 @@ function analyzeGame() {
     const result = analyzeCoefficientsAI(games);
     document.getElementById("result").innerHTML = `<p>${result}</p>`;
 
-    // ✅ Сохраняем результат анализа для истории
-    localStorage.setItem("lastAnalysis", document.getElementById("result").innerHTML);
+    // 🔥 Сохраняем последний анализ в localStorage
+    localStorage.setItem("lastAnalysis", result);
 }
 
 function clearInputs() {
