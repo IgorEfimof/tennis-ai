@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 div.classList.add("history-entry"); // Добавлен класс для стилизации
                 div.innerHTML = `
                     <strong>Анализ от ${entry.timestamp}</strong><br>
-                    <p>${entry.analysisData || "Нет данных для анализа"}</p><br>
+                    ${entry.analysisData || "<p>Нет данных для анализа</p>"}<br>
                 `;
                 historyContent.appendChild(div);
             });
@@ -44,16 +44,9 @@ document.addEventListener("DOMContentLoaded", function () {
         renderHistory(); // Обновляем отображение после сохранения
     }
 
-    // Пример вызова функции сохранения
+    // Обновлённая логика: сохраняем последний анализ из localStorage
     document.getElementById("save-analysis-btn")?.addEventListener("click", () => {
-        const resultElement = document.getElementById("result");
-
-        if (!resultElement) {
-            alert("Элемент с ID 'result' не найден на странице.");
-            return;
-        }
-
-        const analysisData = resultElement.innerText.trim();
+        const analysisData = localStorage.getItem("lastAnalysis");
 
         if (analysisData && analysisData !== "Нет данных для анализа") {
             saveAnalysis(analysisData);
@@ -63,14 +56,14 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    // Генерация данных анализа (пример)
-    function generateAnalysis() {
-        const resultElement = document.getElementById("result");
-        if (resultElement) {
-            resultElement.innerText = "Пример данных анализа: результат теста успешен.";
-        }
-    }
+    // Генерация данных анализа (пример) — удалена, т.к. больше не нужна
+    // function generateAnalysis() {
+    //     const resultElement = document.getElementById("result");
+    //     if (resultElement) {
+    //         resultElement.innerText = "Пример данных анализа: результат теста успешен.";
+    //     }
+    // }
 
-    // Вызов генерации данных для демонстрации
-    generateAnalysis();
+    // generateAnalysis(); — тоже удалена
 });
+
