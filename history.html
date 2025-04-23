@@ -9,7 +9,13 @@
 <body>
     <div class="app-container"> <!-- Используем общий контейнер для стилизации -->
         <h1>История анализов</h1>
+        
         <div id="history-content"></div>
+
+        <!-- Добавленный блок для вывода сообщений / результата -->
+        <div id="result" class="result-section">
+            <p>Здесь появятся уведомления.</p>
+        </div>
         
         <!-- Кнопка для очистки истории -->
         <button id="clear-history-btn">Очистить историю</button>
@@ -20,7 +26,9 @@
         <!-- Кнопка для возврата на главную -->
         <button onclick="window.location.href='index.html'">Назад</button>
     </div>
+    
     <script src="history.js"></script>
 </body>
 </html>
+
 
