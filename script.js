@@ -49,13 +49,15 @@ function clearInputs() {
 function addInputFormatting(inputId, nextInputId) {
     const input = document.getElementById(inputId);
     input.addEventListener("input", () => {
-        let value = input.value.replace(/[^0-9.]/g, "");
+        let value = input.value.replace(/[^0-9.]/g, ""); // Разрешаем ввод цифр и точки
         if (value.length === 0) {
             input.value = "";
-        } else if (value.length === 1) {
-            input.value = value + ".";
-        } else if (value.length > 1) {
-            input.value = value.slice(0, 1) + "." + value.slice(1, 3);
+        } else {
+            // Форматируем вводимое значение как число с двумя знаками после запятой
+            let floatValue = parseFloat(value);
+            if (!isNaN(floatValue)) {
+                input.value = floatValue.toFixed(2);
+            }
         }
 
         if (input.value.length === 4 && nextInputId) {
