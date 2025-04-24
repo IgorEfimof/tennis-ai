@@ -37,6 +37,12 @@ function analyzeGame() {
     const result = analyzeCoefficientsAI(games);
     document.getElementById("result").innerHTML = `<p>${result}</p>`;
 
+    // 🔍 Проверка на "похожую на заходящую" ставку
+    const prediction = isLikelyWinner(result);
+    if (prediction.likely) {
+        alert(`🔥 Обнаружена вероятная value-ставка на Игрока ${prediction.player} с ROI ${prediction.roi}% — высокая вероятность успеха!`);
+    }
+
     // 🔥 Сохраняем последний анализ в localStorage
     localStorage.setItem("lastAnalysis", result);
 }
@@ -130,6 +136,36 @@ function analyzeCoefficientsAI(games) {
         <strong>${recommendation}</strong>
     `;
 }
+
+// 🔍 Расчёт на основе истории успешных value-ставок
+function isLikelyWinner(analysisData) {
+    const roiRegex = /Value-ставка на Игрока ([12]) — ROI:\s*([0-9.]+)%/;
+    const fairOddsRegex = /Value-коэффициенты \(справедливые\):\s*Игрок 1: ([0-9.]+) \| Игрок 2: ([0-9.]+)/;
+    const avgOddsRegex = /Средние коэффициенты:\s*Игрок 1: ([0-9.]+) \| Игрок 2: ([0-9.]+)/;
+
+    const roiMatch = analysisData.match(roiRegex);
+    const fairMatch = analysisData.match(fairOddsRegex);
+    const avgMatch = analysisData.match(avgOddsRegex);
+
+    if (roiMatch && fairMatch && avgMatch) {
+        const playerIndex = parseInt(roiMatch[1]);
+        const roi = parseFloat(roiMatch[2]);
+        const fairOdds = parseFloat(playerIndex === 1 ? fairMatch[1] : fairMatch[2]);
+        const avgOdds = parseFloat(playerIndex === 1 ? avgMatch[1] : avgMatch[2]);
+
+        // Логика на основе успешных паттернов
+        if (roi >= 8 && fairOdds < avgOdds) {
+            return {
+                likely: true,
+                player: playerIndex,
+                roi: roi.toFixed(2),
+            };
+        }
+    }
+
+    return { likely: false };
+}
+
 
 
 
