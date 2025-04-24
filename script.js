@@ -35,15 +35,22 @@ function analyzeGame() {
     }
 
     const result = analyzeCoefficientsAI(games);
-    document.getElementById("result").innerHTML = `<p>${result}</p>`;
-
-    // 🔍 Проверка на "похожую на заходящую" ставку
     const prediction = isLikelyWinner(result);
+
+    let resultHTML = `<p>${result}</p>`;
+
+    // Проверка на "горячую ставку"
     if (prediction.likely) {
-        alert(`🔥 Обнаружена вероятная value-ставка на Игрока ${prediction.player} с ROI ${prediction.roi}% — высокая вероятность успеха!`);
+        resultHTML += `
+            <p style="color: red; font-weight: bold; font-size: 18px;">
+                🔥 Горячая ставка: Игрок ${prediction.player} (ROI: ${prediction.roi}%)<br>
+                <span style="font-size: 14px; color: #444;">Похожий паттерн ранее часто срабатывал.</span>
+            </p>`;
     }
 
-    // 🔥 Сохраняем последний анализ в localStorage
+    document.getElementById("result").innerHTML = resultHTML;
+
+    // Сохраняем последний анализ в localStorage
     localStorage.setItem("lastAnalysis", result);
 }
 
@@ -165,6 +172,7 @@ function isLikelyWinner(analysisData) {
 
     return { likely: false };
 }
+
 
 
 
