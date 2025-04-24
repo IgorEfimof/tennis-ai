@@ -37,7 +37,7 @@ function analyzeGame() {
     const result = analyzeCoefficientsAI(games);
     document.getElementById("result").innerHTML = `<p>${result}</p>`;
 
-    // Сохраняем последний анализ в localStorage
+    // 🔥 Сохраняем последний анализ в localStorage
     localStorage.setItem("lastAnalysis", result);
 }
 
@@ -49,15 +49,13 @@ function clearInputs() {
 function addInputFormatting(inputId, nextInputId) {
     const input = document.getElementById(inputId);
     input.addEventListener("input", () => {
-        let value = input.value.replace(/[^0-9.]/g, ""); // Разрешаем ввод цифр и точки
+        let value = input.value.replace(/[^0-9]/g, "");
         if (value.length === 0) {
             input.value = "";
-        } else {
-            // Форматируем вводимое значение как число с двумя знаками после запятой
-            let floatValue = parseFloat(value);
-            if (!isNaN(floatValue)) {
-                input.value = floatValue.toFixed(2);
-            }
+        } else if (value.length === 1) {
+            input.value = value + ".";
+        } else if (value.length > 1) {
+            input.value = value.slice(0, 1) + "." + value.slice(1, 3);
         }
 
         if (input.value.length === 4 && nextInputId) {
