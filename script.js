@@ -37,7 +37,7 @@ function analyzeGame() {
     const result = analyzeCoefficientsAI(games);
     document.getElementById("result").innerHTML = `<p>${result}</p>`;
 
-    // 🔥 Сохраняем последний анализ в localStorage
+    // Сохраняем последний анализ в localStorage
     localStorage.setItem("lastAnalysis", result);
 }
 
@@ -49,7 +49,7 @@ function clearInputs() {
 function addInputFormatting(inputId, nextInputId) {
     const input = document.getElementById(inputId);
     input.addEventListener("input", () => {
-        let value = input.value.replace(/[^0-9]/g, "");
+        let value = input.value.replace(/[^0-9.]/g, "");
         if (value.length === 0) {
             input.value = "";
         } else if (value.length === 1) {
