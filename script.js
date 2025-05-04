@@ -1,7 +1,6 @@
 document.getElementById("analyze-btn").addEventListener("click", analyzeGame);
 document.getElementById("clear-btn").addEventListener("click", clearInputs);
 
-// Форматирование и переход между полями
 const fields = [
     "game-5-player1", "game-5-player2",
     "game-6-player1", "game-6-player2",
@@ -27,19 +26,14 @@ function analyzeGame() {
             return;
         }
 
-        games.push({
-            game: i,
-            player1,
-            player2
-        });
+        games.push({ game: i, player1, player2 });
     }
 
     const result = analyzeCoefficientsAI(games);
-    const prediction = isLikelyWinner(result);
+    const prediction = isLikelyWinner(result.html);
 
-    let resultHTML = `<p>${result}</p>`;
+    let resultHTML = `<p>${result.html}</p>`;
 
-    // Проверка на "горячую ставку"
     if (prediction.likely) {
         resultHTML += `
             <p style="color: red; font-weight: bold; font-size: 18px;">
@@ -48,10 +42,24 @@ function analyzeGame() {
             </p>`;
     }
 
-    document.getElementById("result").innerHTML = resultHTML;
+    if (result.anomalies.length > 0) {
+        resultHTML += `
+            <div style="margin-top: 25px; padding: 12px; background: #fffbe6; border-left: 5px solid orange; border-radius: 6px;">
+                <p style="margin: 0; font-weight: bold; color: #cc7000; font-size: 16px;">🚨 Обнаружены аномалии коэффициентов:</p>
+                <ul style="margin: 8px 0 0 16px; padding: 0; color: #555; font-size: 14px;">
+                    ${result.anomalies.map(a => {
+                        const color = a.direction === "вырос" ? "#cc0000" : "#009900";
+                        const arrow = a.direction === "вырос" ? "⬆️" : "⬇️";
+                        return `<li><span style="color: ${color}; font-weight: bold;">${arrow}</span> Игрок ${a.player} (Гейм ${a.game}) — коэффициент ${a.direction} на ${a.percent}%</li>`;
+                    }).join("")}
+                </ul>
+                <p style="margin-top: 8px; font-size: 13px; color: #888;">✳️ Возможная ошибка рынка. Проверь ручной анализ перед ставкой.</p>
+            </div>
+        `;
+    }
 
-    // Сохраняем последний анализ в localStorage
-    localStorage.setItem("lastAnalysis", result);
+    document.getElementById("result").innerHTML = resultHTML;
+    localStorage.setItem("lastAnalysis", result.html);
 }
 
 function clearInputs() {
@@ -80,22 +88,29 @@ function addInputFormatting(inputId, nextInputId) {
     });
 }
 
-// Обновлённый AI-анализ с учётом value, ROI и падения коэффициента
 function analyzeCoefficientsAI(games) {
-    let player1Sum = 0;
-    let player2Sum = 0;
-    let player1Drop = 0;
-    let player2Drop = 0;
+    let player1Sum = 0, player2Sum = 0;
+    let player1Drop = 0, player2Drop = 0;
+    let anomalies = [];
 
     for (let i = 0; i < games.length; i++) {
-        const { player1, player2 } = games[i];
+        const { player1, player2, game } = games[i];
         player1Sum += player1;
         player2Sum += player2;
 
         if (i > 0) {
             const prev = games[i - 1];
-            player1Drop += prev.player1 - player1;
-            player2Drop += prev.player2 - player2;
+            const drop1 = prev.player1 - player1;
+            const drop2 = prev.player2 - player2;
+
+            player1Drop += drop1;
+            player2Drop += drop2;
+
+            const change1 = (drop1 / prev.player1) * 100;
+            const change2 = (drop2 / prev.player2) * 100;
+
+            if (Math.abs(change1) > 5) anomalies.push({ player: 1, game, direction: change1 < 0 ? "вырос" : "упал", percent: Math.abs(change1.toFixed(2)) });
+            if (Math.abs(change2) > 5) anomalies.push({ player: 2, game, direction: change2 < 0 ? "вырос" : "упал", percent: Math.abs(change2.toFixed(2)) });
         }
     }
 
@@ -118,7 +133,6 @@ function analyzeCoefficientsAI(games) {
     const fairCoeffP1 = 1 / scoreP1;
     const fairCoeffP2 = 1 / scoreP2;
 
-    // ROI расчёт
     const roiP1 = ((avgP1 - fairCoeffP1) / fairCoeffP1) * 100;
     const roiP2 = ((avgP2 - fairCoeffP2) / fairCoeffP2) * 100;
 
@@ -131,28 +145,30 @@ function analyzeCoefficientsAI(games) {
         recommendation = `⚪️ Явной value-ставки не найдено. Лучше не рисковать.`;
     }
 
-    return `
-        <strong>Средние коэффициенты:</strong><br>
-        Игрок 1: ${avgP1.toFixed(2)} | Игрок 2: ${avgP2.toFixed(2)}<br>
-        <strong>Имплайд-вероятности с поправкой:</strong><br>
-        Игрок 1: ${(scoreP1 * 100).toFixed(1)}% | Игрок 2: ${(scoreP2 * 100).toFixed(1)}%<br>
-        <strong>Value-коэффициенты (справедливые):</strong><br>
-        Игрок 1: ${fairCoeffP1.toFixed(2)} | Игрок 2: ${fairCoeffP2.toFixed(2)}<br>
-        <strong>Ожидаемый ROI:</strong><br>
-        Игрок 1: ${roiP1.toFixed(2)}% | Игрок 2: ${roiP2.toFixed(2)}%<br><br>
-        <strong>${recommendation}</strong>
-    `;
+    return {
+        html: `
+            <strong>Средние коэффициенты:</strong><br>
+            Игрок 1: ${avgP1.toFixed(2)} | Игрок 2: ${avgP2.toFixed(2)}<br>
+            <strong>Имплайд-вероятности с поправкой:</strong><br>
+            Игрок 1: ${(scoreP1 * 100).toFixed(1)}% | Игрок 2: ${(scoreP2 * 100).toFixed(1)}%<br>
+            <strong>Value-коэффициенты (справедливые):</strong><br>
+            Игрок 1: ${fairCoeffP1.toFixed(2)} | Игрок 2: ${fairCoeffP2.toFixed(2)}<br>
+            <strong>Ожидаемый ROI:</strong><br>
+            Игрок 1: ${roiP1.toFixed(2)}% | Игрок 2: ${roiP2.toFixed(2)}%<br><br>
+            <strong>${recommendation}</strong>
+        `,
+        anomalies
+    };
 }
 
-// 🔍 Расчёт на основе истории успешных value-ставок
-function isLikelyWinner(analysisData) {
+function isLikelyWinner(analysisHTML) {
     const roiRegex = /Value-ставка на Игрока ([12]) — ROI:\s*([0-9.]+)%/;
     const fairOddsRegex = /Value-коэффициенты \(справедливые\):\s*Игрок 1: ([0-9.]+) \| Игрок 2: ([0-9.]+)/;
     const avgOddsRegex = /Средние коэффициенты:\s*Игрок 1: ([0-9.]+) \| Игрок 2: ([0-9.]+)/;
 
-    const roiMatch = analysisData.match(roiRegex);
-    const fairMatch = analysisData.match(fairOddsRegex);
-    const avgMatch = analysisData.match(avgOddsRegex);
+    const roiMatch = analysisHTML.match(roiRegex);
+    const fairMatch = analysisHTML.match(fairOddsRegex);
+    const avgMatch = analysisHTML.match(avgOddsRegex);
 
     if (roiMatch && fairMatch && avgMatch) {
         const playerIndex = parseInt(roiMatch[1]);
@@ -160,25 +176,9 @@ function isLikelyWinner(analysisData) {
         const fairOdds = parseFloat(playerIndex === 1 ? fairMatch[1] : fairMatch[2]);
         const avgOdds = parseFloat(playerIndex === 1 ? avgMatch[1] : avgMatch[2]);
 
-        // Логика на основе успешных паттернов
         if (roi >= 8 && fairOdds < avgOdds) {
-            return {
-                likely: true,
-                player: playerIndex,
-                roi: roi.toFixed(2),
-            };
+            return { likely: true, player: playerIndex, roi: roi.toFixed(2) };
         }
     }
-
     return { likely: false };
 }
-
-
-
-
-
-
-
-
-
-
