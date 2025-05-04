@@ -22,91 +22,27 @@ function analyzeGame() {
         const player2 = parseFloat(document.getElementById(`game-${i}-player2`).value);
 
         if (isNaN(player1) || isNaN(player2)) {
-            document.getElementById("result").innerHTML = "<p>Пожалуйста, введите все коэффициенты для игр.</p>";
+            document.getElementById("result").innerHTML = "<p style='color: red;'>Пожалуйста, введите все коэффициенты для игр.</p>";
+            document.getElementById("ai-prediction").innerHTML = "";
             return;
         }
 
-        games.push({ game: i, player1, player2 });
+        games.push({ player1, player2 });
     }
 
-    const { winner, confidence, fairOdds, valuePercents } = predictWinner(games);
+    const prediction = smartAIPrediction(games);
 
-    if (!winner) {
-        document.getElementById("result").innerHTML = `<p style="color: green;">🤖 Недостаточно уверенности для прогноза.</p>`;
-        document.getElementById("ai-prediction").innerHTML = "";
-        return;
+    if (prediction.winner) {
+        document.getElementById("result").innerHTML = "";
+        document.getElementById("ai-prediction").innerHTML =
+            `<span style="color: green; font-weight: bold;">🤖 Прогноз AI: Победит Игрок ${prediction.winner} (уверенность: ${prediction.confidence}%)</span>`;
+    } else {
+        document.getElementById("result").innerHTML = "";
+        document.getElementById("ai-prediction").innerHTML =
+            `<span style="color: orange; font-weight: bold;">🤖 Прогноз AI: Недостаточно уверенности для прогноза.</span>`;
     }
 
-    const playerAvg = games.reduce((acc, g) => {
-        acc.player1 += g.player1;
-        acc.player2 += g.player2;
-        return acc;
-    }, { player1: 0, player2: 0 });
-
-    const avg1 = (playerAvg.player1 / games.length).toFixed(2);
-    const avg2 = (playerAvg.player2 / games.length).toFixed(2);
-
-    const vp1 = valuePercents.player1.toFixed(1);
-    const vp2 = valuePercents.player2.toFixed(1);
-    const fair1 = fairOdds.player1.toFixed(2);
-    const fair2 = fairOdds.player2.toFixed(2);
-
-    const resultHTML = `
-        <p style="color: green; font-weight: bold;">
-            🤖 Победитель: Игрок ${winner} (уверенность: ${confidence}%)
-        </p>
-        <p>
-            <strong>Средние коэффициенты:</strong> Игрок 1: ${avg1} | Игрок 2: ${avg2}<br>
-            <strong>Справедливые коэффициенты (AI):</strong> Игрок 1: ${fair1} | Игрок 2: ${fair2}<br>
-            <strong>Value-переоценка:</strong> 
-            Игрок 1: ${vp1}% | Игрок 2: ${vp2}%
-        </p>
-    `;
-
-    document.getElementById("result").innerHTML = resultHTML;
-    document.getElementById("ai-prediction").innerHTML = "";
-    localStorage.setItem("lastAnalysis", resultHTML);
-}
-
-function predictWinner(games) {
-    const avg1 = games.reduce((sum, g) => sum + g.player1, 0) / games.length;
-    const avg2 = games.reduce((sum, g) => sum + g.player2, 0) / games.length;
-
-    const imp1 = 1 / avg1;
-    const imp2 = 1 / avg2;
-    const total = imp1 + imp2;
-
-    let trend1 = 0, trend2 = 0;
-    for (let i = 1; i < games.length; i++) {
-        trend1 += Math.max(0, games[i - 1].player1 - games[i].player1);
-        trend2 += Math.max(0, games[i - 1].player2 - games[i].player2);
-    }
-
-    const adjImp1 = imp1 / total + trend1 * 0.015;
-    const adjImp2 = imp2 / total + trend2 * 0.015;
-    const adjTotal = adjImp1 + adjImp2;
-
-    const prob1 = adjImp1 / adjTotal;
-    const prob2 = adjImp2 / adjTotal;
-
-    const fairOdds = {
-        player1: 1 / prob1,
-        player2: 1 / prob2
-    };
-
-    const valuePercents = {
-        player1: ((avg1 - fairOdds.player1) / fairOdds.player1) * 100,
-        player2: ((avg2 - fairOdds.player2) / fairOdds.player2) * 100
-    };
-
-    if (Math.abs(prob1 - prob2) < 0.05) {
-        return { winner: null };
-    }
-
-    const winner = prob1 > prob2 ? 1 : 2;
-    const confidence = ((Math.max(prob1, prob2)) * 100).toFixed(1);
-
-    return { winner, confidence, fairOdds, valuePercents };
+    localStorage.setItem("lastAnalysis", JSON.stringify(prediction));
 }
 
 function clearInputs() {
@@ -134,4 +70,50 @@ function addInputFormatting(inputId, nextInputId) {
             }
         }
     });
+}
+
+// Умный анализ коэффициентов
+function smartAIPrediction(games) {
+    let totalAdj1 = 0;
+    let totalAdj2 = 0;
+    let player1Trend = 0;
+    let player2Trend = 0;
+
+    for (let i = 0; i < games.length; i++) {
+        const { player1, player2 } = games[i];
+        const imp1 = 1 / player1;
+        const imp2 = 1 / player2;
+        const sumImp = imp1 + imp2;
+
+        const adj1 = imp1 / sumImp;
+        const adj2 = imp2 / sumImp;
+
+        totalAdj1 += adj1;
+        totalAdj2 += adj2;
+
+        if (i > 0) {
+            const prev = games[i - 1];
+            const drop1 = prev.player1 - player1;
+            const drop2 = prev.player2 - player2;
+            if (drop1 > 0) player1Trend += drop1;
+            if (drop2 > 0) player2Trend += drop2;
+        }
+    }
+
+    const avgAdj1 = totalAdj1 / games.length;
+    const avgAdj2 = totalAdj2 / games.length;
+
+    const trendWeight = 0.01; // Вес тренда
+    const score1 = avgAdj1 + player1Trend * trendWeight;
+    const score2 = avgAdj2 + player2Trend * trendWeight;
+
+    const diff = Math.abs(score1 - score2);
+    const threshold = 0.05; // Порог для уверенного прогноза
+
+    if (diff < threshold) return { winner: null };
+
+    const winner = score1 > score2 ? 1 : 2;
+    const confidence = (Math.max(score1, score2) * 100).toFixed(1);
+
+    return { winner, confidence };
 }
