@@ -1,7 +1,5 @@
 document.getElementById("analyze-btn").addEventListener("click", analyzeGame);
 document.getElementById("clear-btn").addEventListener("click", clearInputs);
-document.getElementById("victory-btn").addEventListener("click", handleVictory);
-document.getElementById("loss-btn").addEventListener("click", handleLoss);
 
 const fields = [
     "game-5-player1", "game-5-player2",
@@ -17,8 +15,6 @@ fields.forEach((fieldId, index) => {
     addInputFormatting(fieldId, nextFieldId);
 });
 
-let prediction = {};
-
 function analyzeGame() {
     const games = [];
     for (let i = 5; i <= 10; i++) {
@@ -30,69 +26,87 @@ function analyzeGame() {
             return;
         }
 
-        games.push({
-            game: i,
-            player1,
-            player2
-        });
+        games.push({ game: i, player1, player2 });
     }
 
-    const result = analyzeCoefficientsAI(games);
-    prediction = predictWinner(games);
-    
-    let history = JSON.parse(localStorage.getItem("predictionHistory") || "[]");
-    let accuracy = 0;
-    if (history.length > 0) {
-        const correctPredictions = history.filter(item => item.result === "победил" && item.prediction.winner === item.resultPlayer).length;
-        accuracy = (correctPredictions / history.length) * 100;
+    const { winner, confidence, fairOdds, valuePercents } = predictWinner(games);
+
+    if (!winner) {
+        document.getElementById("result").innerHTML = `<p style="color: green;">🤖 Недостаточно уверенности для прогноза.</p>`;
+        document.getElementById("ai-prediction").innerHTML = "";
+        return;
     }
 
-    let adjustedConfidence = prediction.confidence;
-    if (accuracy > 80) {
-        adjustedConfidence *= 1.1;
-    } else if (accuracy < 60) {
-        adjustedConfidence *= 0.9;
-    }
+    const playerAvg = games.reduce((acc, g) => {
+        acc.player1 += g.player1;
+        acc.player2 += g.player2;
+        return acc;
+    }, { player1: 0, player2: 0 });
 
-    let resultHTML = `<p>${result}</p>`;
+    const avg1 = (playerAvg.player1 / games.length).toFixed(2);
+    const avg2 = (playerAvg.player2 / games.length).toFixed(2);
+
+    const vp1 = valuePercents.player1.toFixed(1);
+    const vp2 = valuePercents.player2.toFixed(1);
+    const fair1 = fairOdds.player1.toFixed(2);
+    const fair2 = fairOdds.player2.toFixed(2);
+
+    const resultHTML = `
+        <p style="color: green; font-weight: bold;">
+            🤖 Победитель: Игрок ${winner} (уверенность: ${confidence}%)
+        </p>
+        <p>
+            <strong>Средние коэффициенты:</strong> Игрок 1: ${avg1} | Игрок 2: ${avg2}<br>
+            <strong>Справедливые коэффициенты (AI):</strong> Игрок 1: ${fair1} | Игрок 2: ${fair2}<br>
+            <strong>Value-переоценка:</strong> 
+            Игрок 1: ${vp1}% | Игрок 2: ${vp2}%
+        </p>
+    `;
+
     document.getElementById("result").innerHTML = resultHTML;
+    document.getElementById("ai-prediction").innerHTML = "";
+    localStorage.setItem("lastAnalysis", resultHTML);
+}
 
-    if (prediction.winner) {
-        document.getElementById("ai-prediction").innerHTML =
-            `🤖 Прогноз AI: Победит Игрок ${prediction.winner} (уверенность: ${(adjustedConfidence).toFixed(1)}%)<br>` +
-            (accuracy > 0 ? `📊 Историческая точность: ${accuracy.toFixed(1)}%` : '');
-    } else {
-        document.getElementById("ai-prediction").innerHTML =
-            `🤖 Прогноз AI: Недостаточно данных для точного прогноза.`;
+function predictWinner(games) {
+    const avg1 = games.reduce((sum, g) => sum + g.player1, 0) / games.length;
+    const avg2 = games.reduce((sum, g) => sum + g.player2, 0) / games.length;
+
+    const imp1 = 1 / avg1;
+    const imp2 = 1 / avg2;
+    const total = imp1 + imp2;
+
+    let trend1 = 0, trend2 = 0;
+    for (let i = 1; i < games.length; i++) {
+        trend1 += Math.max(0, games[i - 1].player1 - games[i].player1);
+        trend2 += Math.max(0, games[i - 1].player2 - games[i].player2);
     }
 
-    localStorage.setItem("lastAnalysis", result);
-}
+    const adjImp1 = imp1 / total + trend1 * 0.015;
+    const adjImp2 = imp2 / total + trend2 * 0.015;
+    const adjTotal = adjImp1 + adjImp2;
 
-function handleVictory() {
-    const result = { 
-        game: prediction.game, 
-        prediction: prediction, 
-        result: "победил",
-        resultPlayer: prediction.winner
+    const prob1 = adjImp1 / adjTotal;
+    const prob2 = adjImp2 / adjTotal;
+
+    const fairOdds = {
+        player1: 1 / prob1,
+        player2: 1 / prob2
     };
-    saveGameResult(result);
-}
 
-function handleLoss() {
-    const result = { 
-        game: prediction.game, 
-        prediction: prediction, 
-        result: "проиграл",
-        resultPlayer: prediction.winner === 1 ? 2 : 1 
+    const valuePercents = {
+        player1: ((avg1 - fairOdds.player1) / fairOdds.player1) * 100,
+        player2: ((avg2 - fairOdds.player2) / fairOdds.player2) * 100
     };
-    saveGameResult(result);
-}
 
-function saveGameResult(result) {
-    let history = JSON.parse(localStorage.getItem("predictionHistory") || "[]");
-    history.push(result);
-    localStorage.setItem("predictionHistory", JSON.stringify(history));
+    if (Math.abs(prob1 - prob2) < 0.05) {
+        return { winner: null };
+    }
+
+    const winner = prob1 > prob2 ? 1 : 2;
+    const confidence = ((Math.max(prob1, prob2)) * 100).toFixed(1);
+
+    return { winner, confidence, fairOdds, valuePercents };
 }
 
 function clearInputs() {
@@ -121,13 +135,3 @@ function addInputFormatting(inputId, nextInputId) {
         }
     });
 }
-
-// Функции анализа коэффициентов и прогноза
-function analyzeCoefficientsAI(games) {
-    // Логика анализа коэффициентов...
-}
-
-function predictWinner(games) {
-    // Логика предсказания победителя...
-}
-
