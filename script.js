@@ -26,25 +26,22 @@ function analyzeGame() {
             return;
         }
 
-        games.push({
-            game: i,
-            player1,
-            player2
-        });
+        games.push({ game: i, player1, player2 });
     }
 
     const result = analyzeCoefficientsAI(games);
     const prediction = predictWinner(games);
 
-    let resultHTML = `<p>${result}</p>`;
-    document.getElementById("result").innerHTML = resultHTML;
+    document.getElementById("result").innerHTML = `<p>${result}</p>`;
 
+    const aiPrediction = document.getElementById("ai-prediction");
     if (prediction.winner) {
-        document.getElementById("ai-prediction").innerHTML =
-            `🤖 Прогноз AI: Победит Игрок ${prediction.winner} (уверенность: ${prediction.confidence}%)`;
+        aiPrediction.style.color = "#007700"; // зелёный
+        aiPrediction.innerHTML =
+            `🤖 Победит <strong>Игрок ${prediction.winner}</strong> (уверенность: ${prediction.confidence}%)`;
     } else {
-        document.getElementById("ai-prediction").innerHTML =
-            `🤖 Прогноз AI: Недостаточно данных для точного прогноза.`;
+        aiPrediction.style.color = "#777";
+        aiPrediction.innerHTML = `🤖 Недостаточно уверенности для прогноза.`;
     }
 
     localStorage.setItem("lastAnalysis", result);
@@ -80,103 +77,79 @@ function addInputFormatting(inputId, nextInputId) {
 function analyzeCoefficientsAI(games) {
     let player1Sum = 0;
     let player2Sum = 0;
-    let player1Drop = 0;
-    let player2Drop = 0;
 
     for (let i = 0; i < games.length; i++) {
-        const { player1, player2 } = games[i];
-        player1Sum += player1;
-        player2Sum += player2;
-
-        if (i > 0) {
-            const prev = games[i - 1];
-            player1Drop += prev.player1 - player1;
-            player2Drop += prev.player2 - player2;
-        }
+        player1Sum += games[i].player1;
+        player2Sum += games[i].player2;
     }
 
     const avgP1 = player1Sum / games.length;
     const avgP2 = player2Sum / games.length;
 
-    let impP1 = 1 / avgP1;
-    let impP2 = 1 / avgP2;
-    const totalImp = impP1 + impP2;
+    const fairImp1 = 1 / avgP1;
+    const fairImp2 = 1 / avgP2;
+    const totalImp = fairImp1 + fairImp2;
 
-    impP1 /= totalImp;
-    impP2 /= totalImp;
+    const norm1 = fairImp1 / totalImp;
+    const norm2 = fairImp2 / totalImp;
 
-    const dropBonus1 = Math.max(0, player1Drop) * 0.05;
-    const dropBonus2 = Math.max(0, player2Drop) * 0.05;
+    const fairCoeff1 = 1 / norm1;
+    const fairCoeff2 = 1 / norm2;
 
-    const scoreP1 = impP1 + dropBonus1;
-    const scoreP2 = impP2 + dropBonus2;
-
-    const fairCoeffP1 = 1 / scoreP1;
-    const fairCoeffP2 = 1 / scoreP2;
-
-    const roiP1 = ((avgP1 - fairCoeffP1) / fairCoeffP1) * 100;
-    const roiP2 = ((avgP2 - fairCoeffP2) / fairCoeffP2) * 100;
+    const roiP1 = ((avgP1 - fairCoeff1) / fairCoeff1) * 100;
+    const roiP2 = ((avgP2 - fairCoeff2) / fairCoeff2) * 100;
 
     let recommendation = "";
-    if (avgP1 > fairCoeffP1 && roiP1 > 5) {
+    if (roiP1 > 5 && avgP1 > fairCoeff1) {
         recommendation = `🟢 Value-ставка на Игрока 1 — ROI: ${roiP1.toFixed(2)}%`;
-    } else if (avgP2 > fairCoeffP2 && roiP2 > 5) {
+    } else if (roiP2 > 5 && avgP2 > fairCoeff2) {
         recommendation = `🟢 Value-ставка на Игрока 2 — ROI: ${roiP2.toFixed(2)}%`;
     } else {
-        recommendation = `⚪️ Явной value-ставки не найдено. Лучше не рисковать.`;
+        recommendation = `⚪️ Явной value-ставки не найдено.`;
     }
 
-    return `
-        <strong>Средние коэффициенты:</strong><br>
-        Игрок 1: ${avgP1.toFixed(2)} | Игрок 2: ${avgP2.toFixed(2)}<br>
-        <strong>Имплайд-вероятности с поправкой:</strong><br>
-        Игрок 1: ${(scoreP1 * 100).toFixed(1)}% | Игрок 2: ${(scoreP2 * 100).toFixed(1)}%<br>
-        <strong>Value-коэффициенты (справедливые):</strong><br>
-        Игрок 1: ${fairCoeffP1.toFixed(2)} | Игрок 2: ${fairCoeffP2.toFixed(2)}<br>
-        <strong>Ожидаемый ROI:</strong><br>
-        Игрок 1: ${roiP1.toFixed(2)}% | Игрок 2: ${roiP2.toFixed(2)}%<br><br>
-        <strong>${recommendation}</strong>
-    `;
+    return recommendation;
 }
 
 function predictWinner(games) {
-    let player1Trend = 0;
-    let player2Trend = 0;
-    let drops = 0;
+    const weights = [0.05, 0.1, 0.15, 0.2, 0.25, 0.25];
+    let imp1 = 0, imp2 = 0, sumWeights = 0;
+    let diffs1 = [], diffs2 = [];
 
-    for (let i = 1; i < games.length; i++) {
-        const prev = games[i - 1];
-        const curr = games[i];
-
-        const drop1 = prev.player1 - curr.player1;
-        const drop2 = prev.player2 - curr.player2;
-
-        if (drop1 > 0) {
-            player1Trend += drop1;
-            drops++;
-        }
-        if (drop2 > 0) {
-            player2Trend += drop2;
-            drops++;
-        }
+    for (let i = 0; i < games.length; i++) {
+        const w = weights[i] || 0.1;
+        const g = games[i];
+        imp1 += (1 / g.player1) * w;
+        imp2 += (1 / g.player2) * w;
+        sumWeights += w;
     }
 
-    const avg1 = games.reduce((sum, g) => sum + g.player1, 0) / games.length;
-    const avg2 = games.reduce((sum, g) => sum + g.player2, 0) / games.length;
+    const normImp1 = imp1 / sumWeights;
+    const normImp2 = imp2 / sumWeights;
+    const total = normImp1 + normImp2;
 
-    const imp1 = 1 / avg1;
-    const imp2 = 1 / avg2;
-    const total = imp1 + imp2;
+    const winProb1 = normImp1 / total;
+    const winProb2 = normImp2 / total;
 
-    const winProb1 = (imp1 / total) + (player1Trend * 0.01);
-    const winProb2 = (imp2 / total) + (player2Trend * 0.01);
+    for (let i = 1; i < games.length; i++) {
+        diffs1.push(games[i - 1].player1 - games[i].player1);
+        diffs2.push(games[i - 1].player2 - games[i].player2);
+    }
 
-    if (Math.abs(winProb1 - winProb2) < 0.05) {
+    const dropTrend1 = diffs1.reduce((a, b) => a + b, 0);
+    const dropTrend2 = diffs2.reduce((a, b) => a + b, 0);
+
+    const finalScore1 = winProb1 + dropTrend1 * 0.02;
+    const finalScore2 = winProb2 + dropTrend2 * 0.02;
+
+    const confidence = (Math.abs(finalScore1 - finalScore2) * 100 + 50).toFixed(1);
+
+    if (Math.abs(finalScore1 - finalScore2) < 0.05) {
         return { winner: null };
     }
 
-    const winner = winProb1 > winProb2 ? 1 : 2;
-    const confidence = ((Math.max(winProb1, winProb2)) * 100).toFixed(1);
-
-    return { winner, confidence };
+    return {
+        winner: finalScore1 > finalScore2 ? 1 : 2,
+        confidence
+    };
 }
