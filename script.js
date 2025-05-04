@@ -26,18 +26,34 @@ function analyzeGame() {
             return;
         }
 
-        games.push({ game: i, player1, player2 });
+        games.push({
+            game: i,
+            player1,
+            player2
+        });
     }
 
-    const resultHTML = analyzeCoefficientsAI(games);
+    const result = analyzeCoefficientsAI(games);
+    const prediction = predictWinner(games);
+
+    let resultHTML = `<p>${result}</p>`;
     document.getElementById("result").innerHTML = resultHTML;
 
-    localStorage.setItem("lastAnalysis", resultHTML);
+    if (prediction.winner) {
+        document.getElementById("ai-prediction").innerHTML =
+            `🤖 Прогноз AI: Победит Игрок ${prediction.winner} (уверенность: ${prediction.confidence}%)`;
+    } else {
+        document.getElementById("ai-prediction").innerHTML =
+            `🤖 Прогноз AI: Недостаточно данных для точного прогноза.`;
+    }
+
+    localStorage.setItem("lastAnalysis", result);
 }
 
 function clearInputs() {
     document.querySelectorAll("input").forEach(input => input.value = "");
     document.getElementById("result").innerHTML = "<p>Рекомендации будут здесь.</p>";
+    document.getElementById("ai-prediction").innerHTML = "";
 }
 
 function addInputFormatting(inputId, nextInputId) {
@@ -62,8 +78,10 @@ function addInputFormatting(inputId, nextInputId) {
 }
 
 function analyzeCoefficientsAI(games) {
-    let player1Sum = 0, player2Sum = 0;
-    let player1Drop = 0, player2Drop = 0;
+    let player1Sum = 0;
+    let player2Sum = 0;
+    let player1Drop = 0;
+    let player2Drop = 0;
 
     for (let i = 0; i < games.length; i++) {
         const { player1, player2 } = games[i];
@@ -99,24 +117,66 @@ function analyzeCoefficientsAI(games) {
     const roiP1 = ((avgP1 - fairCoeffP1) / fairCoeffP1) * 100;
     const roiP2 = ((avgP2 - fairCoeffP2) / fairCoeffP2) * 100;
 
-    // Новый финальный прогноз
-    let prediction = '';
-    if (roiP1 > roiP2 && roiP1 > 3 && fairCoeffP1 < avgP1) {
-        prediction = `🧠 <strong>AI прогноз:</strong> Победит <strong>Игрок 1</strong><br><em>Причины: ROI ${roiP1.toFixed(2)}%, падение коэффициента, заниженный fair-коэффициент.</em>`;
-    } else if (roiP2 > roiP1 && roiP2 > 3 && fairCoeffP2 < avgP2) {
-        prediction = `🧠 <strong>AI прогноз:</strong> Победит <strong>Игрок 2</strong><br><em>Причины: ROI ${roiP2.toFixed(2)}%, падение коэффициента, заниженный fair-коэффициент.</em>`;
+    let recommendation = "";
+    if (avgP1 > fairCoeffP1 && roiP1 > 5) {
+        recommendation = `🟢 Value-ставка на Игрока 1 — ROI: ${roiP1.toFixed(2)}%`;
+    } else if (avgP2 > fairCoeffP2 && roiP2 > 5) {
+        recommendation = `🟢 Value-ставка на Игрока 2 — ROI: ${roiP2.toFixed(2)}%`;
     } else {
-        prediction = `⚪️ <strong>AI прогноз:</strong> Явного фаворита нет — игра слишком равная или недостаточно value.`;
+        recommendation = `⚪️ Явной value-ставки не найдено. Лучше не рисковать.`;
     }
 
     return `
         <strong>Средние коэффициенты:</strong><br>
         Игрок 1: ${avgP1.toFixed(2)} | Игрок 2: ${avgP2.toFixed(2)}<br>
-        <strong>Справедливые коэффициенты (AI):</strong><br>
+        <strong>Имплайд-вероятности с поправкой:</strong><br>
+        Игрок 1: ${(scoreP1 * 100).toFixed(1)}% | Игрок 2: ${(scoreP2 * 100).toFixed(1)}%<br>
+        <strong>Value-коэффициенты (справедливые):</strong><br>
         Игрок 1: ${fairCoeffP1.toFixed(2)} | Игрок 2: ${fairCoeffP2.toFixed(2)}<br>
         <strong>Ожидаемый ROI:</strong><br>
         Игрок 1: ${roiP1.toFixed(2)}% | Игрок 2: ${roiP2.toFixed(2)}%<br><br>
-        ${prediction}
+        <strong>${recommendation}</strong>
     `;
 }
 
+function predictWinner(games) {
+    let player1Trend = 0;
+    let player2Trend = 0;
+    let drops = 0;
+
+    for (let i = 1; i < games.length; i++) {
+        const prev = games[i - 1];
+        const curr = games[i];
+
+        const drop1 = prev.player1 - curr.player1;
+        const drop2 = prev.player2 - curr.player2;
+
+        if (drop1 > 0) {
+            player1Trend += drop1;
+            drops++;
+        }
+        if (drop2 > 0) {
+            player2Trend += drop2;
+            drops++;
+        }
+    }
+
+    const avg1 = games.reduce((sum, g) => sum + g.player1, 0) / games.length;
+    const avg2 = games.reduce((sum, g) => sum + g.player2, 0) / games.length;
+
+    const imp1 = 1 / avg1;
+    const imp2 = 1 / avg2;
+    const total = imp1 + imp2;
+
+    const winProb1 = (imp1 / total) + (player1Trend * 0.01);
+    const winProb2 = (imp2 / total) + (player2Trend * 0.01);
+
+    if (Math.abs(winProb1 - winProb2) < 0.05) {
+        return { winner: null };
+    }
+
+    const winner = winProb1 > winProb2 ? 1 : 2;
+    const confidence = ((Math.max(winProb1, winProb2)) * 100).toFixed(1);
+
+    return { winner, confidence };
+}
