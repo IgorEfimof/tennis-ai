@@ -1,56 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Live Game Analyzer</title>
-  <link rel="stylesheet" href="styles.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Game Analyzer</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="app-container">
-    <h1>Live Game Analyzer</h1>
-    <div class="input-section">
-      <h2>Введите коэффициенты</h2>
-      <div id="inputs">
-        <!-- Игры 5–10 -->
-        <div class="game-input">
-          <input type="text" id="game-5-player1" placeholder="Игрок 1" inputmode="decimal" />
-          <input type="text" id="game-5-player2" placeholder="Игрок 2" inputmode="decimal" />
+    <div class="app-container">
+        <h1>Live Game Analyzer</h1>
+        <div class="input-section">
+            <h2>Введите коэффициенты</h2>
+            <div id="inputs">
+                <div class="game-input">
+                    <input type="text" id="game-5-player1" placeholder="Игрок 1" inputmode="decimal">
+                    <input type="text" id="game-5-player2" placeholder="Игрок 2" inputmode="decimal">
+                </div>
+                <div class="game-input">
+                    <input type="text" id="game-6-player1" placeholder="Игрок 1" inputmode="decimal">
+                    <input type="text" id="game-6-player2" placeholder="Игрок 2" inputmode="decimal">
+                </div>
+                <div class="game-input">
+                    <input type="text" id="game-7-player1" placeholder="Игрок 1" inputmode="decimal">
+                    <input type="text" id="game-7-player2" placeholder="Игрок 2" inputmode="decimal">
+                </div>
+                <div class="game-input">
+                    <input type="text" id="game-8-player1" placeholder="Игрок 1" inputmode="decimal">
+                    <input type="text" id="game-8-player2" placeholder="Игрок 2" inputmode="decimal">
+                </div>
+                <div class="game-input">
+                    <input type="text" id="game-9-player1" placeholder="Игрок 1" inputmode="decimal">
+                    <input type="text" id="game-9-player2" placeholder="Игрок 2" inputmode="decimal">
+                </div>
+                <div class="game-input">
+                    <input type="text" id="game-10-player1" placeholder="Игрок 1" inputmode="decimal">
+                    <input type="text" id="game-10-player2" placeholder="Игрок 2" inputmode="decimal">
+                </div>
+            </div>
+            <button id="analyze-btn">Анализировать</button>
+            <button id="clear-btn">Очистить данные</button>
+            <button onclick="window.location.href='history.html'">История анализов</button>
         </div>
-        <div class="game-input">
-          <input type="text" id="game-6-player1" placeholder="Игрок 1" inputmode="decimal" />
-          <input type="text" id="game-6-player2" placeholder="Игрок 2" inputmode="decimal" />
+
+        <div class="result-section">
+            <h2>Результат AI анализа</h2>
+            <div id="result">
+                <p>Рекомендации будут здесь.</p>
+            </div>
+            <div id="ai-prediction" style="margin-top: 20px; font-size: 18px; font-weight: bold; color: #003366;"></div>
         </div>
-        <div class="game-input">
-          <input type="text" id="game-7-player1" placeholder="Игрок 1" inputmode="decimal" />
-          <input type="text" id="game-7-player2" placeholder="Игрок 2" inputmode="decimal" />
-        </div>
-        <div class="game-input">
-          <input type="text" id="game-8-player1" placeholder="Игрок 1" inputmode="decimal" />
-          <input type="text" id="game-8-player2" placeholder="Игрок 2" inputmode="decimal" />
-        </div>
-        <div class="game-input">
-          <input type="text" id="game-9-player1" placeholder="Игрок 1" inputmode="decimal" />
-          <input type="text" id="game-9-player2" placeholder="Игрок 2" inputmode="decimal" />
-        </div>
-        <div class="game-input">
-          <input type="text" id="game-10-player1" placeholder="Игрок 1" inputmode="decimal" />
-          <input type="text" id="game-10-player2" placeholder="Игрок 2" inputmode="decimal" />
-        </div>
-      </div>
-      <button id="analyze-btn">Анализировать</button>
-      <button id="clear-btn">Очистить данные</button>
-      <button onclick="window.location.href='history.html'">История анализов</button>
+
+        <button id="victory-btn">Победил</button>
+        <button id="loss-btn">Проиграл</button>
     </div>
 
-    <div class="result-section">
-      <h2>Результат AI анализа</h2>
-      <div id="result">
-        <p>Рекомендации будут здесь.</p>
-      </div>
-      <div id="ai-prediction" style="margin-top: 20px; font-size: 18px; font-weight: bold;"></div>
-    </div>
-  </div>
-  <script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
+
