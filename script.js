@@ -18,8 +18,8 @@ fields.forEach((fieldId, index) => {
 function analyzeGame() {
     const games = [];
     for (let i = 5; i <= 10; i++) {
-        const player1 = parseFloat(document.getElementById(game-${i}-player1).value);
-        const player2 = parseFloat(document.getElementById(game-${i}-player2).value);
+        const player1 = parseFloat(document.getElementById(`game-${i}-player1`).value);
+        const player2 = parseFloat(document.getElementById(`game-${i}-player2`).value);
 
         if (isNaN(player1) || isNaN(player2)) {
             document.getElementById("result").innerHTML = "<p>Пожалуйста, введите все коэффициенты для игр.</p>";
@@ -31,53 +31,38 @@ function analyzeGame() {
 
     const { winner, confidence, fairOdds, valuePercents } = predictWinner(games);
 
-    const playerAvg = games.reduce((acc, g) => {
-        acc.player1 += g.player1;
-        acc.player2 += g.player2;
-        return acc;
-    }, { player1: 0, player2: 0 });
-
-    const avg1 = (playerAvg.player1 / games.length).toFixed(2);
-    const avg2 = (playerAvg.player2 / games.length).toFixed(2);
-
-    const vp1 = valuePercents.player1.toFixed(1);
-    const vp2 = valuePercents.player2.toFixed(1);
-    const fair1 = fairOdds.player1.toFixed(2);
-    const fair2 = fairOdds.player2.toFixed(2);
-
-    // Доп. рынки:
     const totalPointsArr = games.map(g => g.player1 + g.player2);
     const avgTotal = totalPointsArr.reduce((a, b) => a + b, 0) / games.length;
-    const totalLine = 18.5;
-    const totalPrediction = ${avgTotal.toFixed(1)} → ${avgTotal > totalLine ? 'Тотал Больше' : 'Тотал Меньше'} ${totalLine};
 
     const spreads = games.map(g => g.player1 - g.player2);
     const avgSpread = spreads.reduce((a, b) => a + b, 0) / spreads.length;
-    const handicapPrediction = Фора ${avgSpread > 0 ? '-' : '+'}${Math.abs(avgSpread).toFixed(1)} на Игрока ${avgSpread > 0 ? '1' : '2'};
 
     let evenCount = 0;
     games.forEach(g => {
         const total = g.player1 + g.player2;
         if (total % 2 === 0) evenCount++;
     });
-    const evenOrOdd = evenCount >= 4 ? Чет (в ${evenCount} из 6 игр) : Нечет (в ${6 - evenCount} из 6 игр);
+    const evenOrOdd = evenCount >= 4 ? `Чет (в ${evenCount} из 6 игр)` : `Нечет (в ${6 - evenCount} из 6 игр)`;
 
-    let resultHTML = 
-        <p style="color: green; font-weight: bold;">
-            🤖 Победитель: ${winner ? Игрок ${winner} (уверенность: ${confidence}%) : 'Недостаточно уверенности для прогноза'}
-        </p>
-        <p>
-            <strong>Средние коэффициенты:</strong> Игрок 1: ${avg1} | Игрок 2: ${avg2}<br>
-            <strong>Справедливые коэффициенты (AI):</strong> Игрок 1: ${fair1} | Игрок 2: ${fair2}<br>
-            <strong>Value-переоценка:</strong> Игрок 1: ${vp1}% | Игрок 2: ${vp2}%
-        </p>
-        <p><strong>Доп. рынки:</strong></p>
-        <ul>
-            <li>🏓 <strong>Средний тотал:</strong> ${totalPrediction}</li>
-            <li>📈 <strong>Средняя фора:</strong> ${handicapPrediction}</li>
-            <li>⚖️ <strong>Чет/Нечет:</strong> ${evenOrOdd}</li>
-        </ul>
-    ;
+    // Новый минималистичный вывод:
+    let resultHTML = "";
+
+    if (winner !== null && ((winner === 1 && avgSpread < 0) || (winner === 2 && avgSpread > 0))) {
+        const absSpread = Math.abs(avgSpread).toFixed(1);
+        resultHTML += `<p style="color: green; font-weight: bold;">
+            🤖 AI прогноз: Победит Игрок ${winner} (Фора -${absSpread})
+        </p>`;
+    }
+
+    if (avgTotal < 18.5 && evenOrOdd.includes("Нечет")) {
+        resultHTML += `<p style="color: blue; font-weight: bold;">
+            Прогноз: Тотал меньше 19.5
+        </p>`;
+    }
+
+    if (!resultHTML) {
+        resultHTML = `<p>Недостаточно данных для уверенного прогноза.</p>`;
+    }
 
     document.getElementById("result").innerHTML = resultHTML;
     document.getElementById("ai-prediction").innerHTML = "";
@@ -150,4 +135,4 @@ function addInputFormatting(inputId, nextInputId) {
             }
         }
     });
-} 
+}
