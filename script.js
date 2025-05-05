@@ -1,7 +1,7 @@
 document.getElementById("analyze-btn").addEventListener("click", analyzeGame);
 document.getElementById("clear-btn").addEventListener("click", clearInputs);
-document.getElementById("victory-btn").addEventListener("click", handleVictory);
-document.getElementById("loss-btn").addEventListener("click", handleLoss);
+document.getElementById("win-btn").addEventListener("click", markWin);
+document.getElementById("lose-btn").addEventListener("click", markLoss);
 
 const fields = [
     "game-5-player1", "game-5-player2",
@@ -17,7 +17,7 @@ fields.forEach((fieldId, index) => {
     addInputFormatting(fieldId, nextFieldId);
 });
 
-let prediction = {};
+let gameHistory = JSON.parse(localStorage.getItem('gameHistory')) || [];
 
 function analyzeGame() {
     const games = [];
@@ -37,62 +37,20 @@ function analyzeGame() {
         });
     }
 
-    const result = analyzeCoefficientsAI(games);
-    prediction = predictWinner(games);
-    
-    let history = JSON.parse(localStorage.getItem("predictionHistory") || "[]");
-    let accuracy = 0;
-    if (history.length > 0) {
-        const correctPredictions = history.filter(item => item.result === "победил" && item.prediction.winner === item.resultPlayer).length;
-        accuracy = (correctPredictions / history.length) * 100;
-    }
-
-    let adjustedConfidence = prediction.confidence;
-    if (accuracy > 80) {
-        adjustedConfidence *= 1.1;
-    } else if (accuracy < 60) {
-        adjustedConfidence *= 0.9;
-    }
-
-    let resultHTML = `<p>${result}</p>`;
+    const prediction = predictWinner(games);
+    let resultHTML = `<p>Прогноз: Победит Игрок ${prediction.winner} с уверенностью ${prediction.confidence}%</p>`;
     document.getElementById("result").innerHTML = resultHTML;
+    
+    document.getElementById("ai-prediction").innerHTML = 
+        `🤖 Прогноз AI: Победит Игрок ${prediction.winner} (уверенность: ${prediction.confidence}%)`;
 
-    if (prediction.winner) {
-        document.getElementById("ai-prediction").innerHTML =
-            `🤖 Прогноз AI: Победит Игрок ${prediction.winner} (уверенность: ${(adjustedConfidence).toFixed(1)}%)<br>` +
-            (accuracy > 0 ? `📊 Историческая точность: ${accuracy.toFixed(1)}%` : '');
-    } else {
-        document.getElementById("ai-prediction").innerHTML =
-            `🤖 Прогноз AI: Недостаточно данных для точного прогноза.`;
-    }
-
-    localStorage.setItem("lastAnalysis", result);
-}
-
-function handleVictory() {
-    const result = { 
-        game: prediction.game, 
-        prediction: prediction, 
-        result: "победил",
-        resultPlayer: prediction.winner
+    // Сохраняем прогноз в историю
+    const analysis = {
+        games,
+        prediction
     };
-    saveGameResult(result);
-}
-
-function handleLoss() {
-    const result = { 
-        game: prediction.game, 
-        prediction: prediction, 
-        result: "проиграл",
-        resultPlayer: prediction.winner === 1 ? 2 : 1 
-    };
-    saveGameResult(result);
-}
-
-function saveGameResult(result) {
-    let history = JSON.parse(localStorage.getItem("predictionHistory") || "[]");
-    history.push(result);
-    localStorage.setItem("predictionHistory", JSON.stringify(history));
+    gameHistory.push(analysis);
+    localStorage.setItem('gameHistory', JSON.stringify(gameHistory));
 }
 
 function clearInputs() {
@@ -104,15 +62,9 @@ function clearInputs() {
 function addInputFormatting(inputId, nextInputId) {
     const input = document.getElementById(inputId);
     input.addEventListener("input", () => {
-        let value = input.value.replace(/[^0-9]/g, "");
-        if (value.length === 0) {
-            input.value = "";
-        } else if (value.length === 1) {
-            input.value = value + ".";
-        } else if (value.length > 1) {
-            input.value = value.slice(0, 1) + "." + value.slice(1, 3);
-        }
-
+        let value = input.value.replace(/[^0-9.]/g, "");
+        input.value = value;
+        
         if (input.value.length === 4 && nextInputId) {
             const nextInput = document.getElementById(nextInputId);
             if (nextInput) {
@@ -122,11 +74,44 @@ function addInputFormatting(inputId, nextInputId) {
     });
 }
 
-// Функции анализа коэффициентов и прогноза
-function analyzeCoefficientsAI(games) {
-    // Логика анализа коэффициентов...
+function predictWinner(games) {
+    let player1Sum = 0;
+    let player2Sum = 0;
+
+    games.forEach(game => {
+        player1Sum += game.player1;
+        player2Sum += game.player2;
+    });
+
+    const avgP1 = player1Sum / games.length;
+    const avgP2 = player2Sum / games.length;
+
+    const impP1 = 1 / avgP1;
+    const impP2 = 1 / avgP2;
+    const totalImp = impP1 + impP2;
+
+    const winProb1 = impP1 / totalImp;
+    const winProb2 = impP2 / totalImp;
+
+    const winner = winProb1 > winProb2 ? 1 : 2;
+    const confidence = Math.max(winProb1, winProb2) * 100;
+
+    return { winner, confidence: confidence.toFixed(1) };
 }
 
-function predictWinner(games) {
-    // Логика предсказания победителя...
+function markWin() {
+    updateHistory('win');
 }
+
+function markLoss() {
+    updateHistory('loss');
+}
+
+function updateHistory(result) {
+    const latestAnalysis = gameHistory[gameHistory.length - 1];
+    if (latestAnalysis) {
+        latestAnalysis.result = result;
+        localStorage.setItem('gameHistory', JSON.stringify(gameHistory));
+    }
+}
+
