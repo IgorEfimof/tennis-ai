@@ -29,7 +29,13 @@ function analyzeGame() {
         games.push({ game: i, player1, player2 });
     }
 
-    const { winner, confidence, fairOdds, valuePercents } = predictWinner(games);
+    const { winner, confidence, fairOdds, valuePercents, totalEstimate, handicap } = predictWinner(games);
+
+    if (!winner) {
+        document.getElementById("result").innerHTML = `<p style="color: green;">🤖 Недостаточно уверенности для прогноза.</p>`;
+        document.getElementById("ai-prediction").innerHTML = "";
+        return;
+    }
 
     const playerAvg = games.reduce((acc, g) => {
         acc.player1 += g.player1;
@@ -45,38 +51,18 @@ function analyzeGame() {
     const fair1 = fairOdds.player1.toFixed(2);
     const fair2 = fairOdds.player2.toFixed(2);
 
-    // Доп. рынки:
-    const totalPointsArr = games.map(g => g.player1 + g.player2);
-    const avgTotal = totalPointsArr.reduce((a, b) => a + b, 0) / games.length;
-    const totalLine = 18.5;
-    const totalPrediction = `${avgTotal.toFixed(1)} → ${avgTotal > totalLine ? 'Тотал Больше' : 'Тотал Меньше'} ${totalLine}`;
-
-    const spreads = games.map(g => g.player1 - g.player2);
-    const avgSpread = spreads.reduce((a, b) => a + b, 0) / spreads.length;
-    const handicapPrediction = `Фора ${avgSpread > 0 ? '-' : '+'}${Math.abs(avgSpread).toFixed(1)} на Игрока ${avgSpread > 0 ? '1' : '2'}`;
-
-    let evenCount = 0;
-    games.forEach(g => {
-        const total = g.player1 + g.player2;
-        if (total % 2 === 0) evenCount++;
-    });
-    const evenOrOdd = evenCount >= 4 ? `Чет (в ${evenCount} из 6 игр)` : `Нечет (в ${6 - evenCount} из 6 игр)`;
-
-    let resultHTML = `
+    const resultHTML = `
         <p style="color: green; font-weight: bold;">
-            🤖 Победитель: ${winner ? `Игрок ${winner} (уверенность: ${confidence}%)` : 'Недостаточно уверенности для прогноза'}
+            🤖 Победитель: Игрок ${winner} (уверенность: ${confidence}%)
         </p>
         <p>
             <strong>Средние коэффициенты:</strong> Игрок 1: ${avg1} | Игрок 2: ${avg2}<br>
             <strong>Справедливые коэффициенты (AI):</strong> Игрок 1: ${fair1} | Игрок 2: ${fair2}<br>
-            <strong>Value-переоценка:</strong> Игрок 1: ${vp1}% | Игрок 2: ${vp2}%
+            <strong>Value-переоценка:</strong> Игрок 1: ${vp1}% | Игрок 2: ${vp2}%<br><br>
+            <strong>Доп. рынки (AI):</strong><br>
+            Ожидаемый тотал очков: <strong>${totalEstimate}</strong><br>
+            Рекомендуемая фора: <strong>${handicap}</strong>
         </p>
-        <p><strong>Доп. рынки:</strong></p>
-        <ul>
-            <li>🏓 <strong>Средний тотал:</strong> ${totalPrediction}</li>
-            <li>📈 <strong>Средняя фора:</strong> ${handicapPrediction}</li>
-            <li>⚖️ <strong>Чет/Нечет:</strong> ${evenOrOdd}</li>
-        </ul>
     `;
 
     document.getElementById("result").innerHTML = resultHTML;
@@ -115,14 +101,35 @@ function predictWinner(games) {
         player2: ((avg2 - fairOdds.player2) / fairOdds.player2) * 100
     };
 
+    // Тотал очков (грубая оценка)
+    const totalEstimate = (
+        games.map(g => {
+            const p1 = 1 / g.player1;
+            const p2 = 1 / g.player2;
+            const t = 11 + Math.abs(p1 - p2) * 5;
+            return t;
+        }).reduce((a, b) => a + b, 0) / games.length
+    ).toFixed(1);
+
+    // Фора
+    const impDiff = Math.abs(imp1 - imp2);
+    let handicap;
+    if (impDiff < 0.05) {
+        handicap = "±1.5 (равные силы)";
+    } else if (impDiff < 0.15) {
+        handicap = "+3.5 на андердога";
+    } else {
+        handicap = "+5.5 на андердога";
+    }
+
     if (Math.abs(prob1 - prob2) < 0.05) {
-        return { winner: null, confidence: null, fairOdds, valuePercents };
+        return { winner: null };
     }
 
     const winner = prob1 > prob2 ? 1 : 2;
     const confidence = ((Math.max(prob1, prob2)) * 100).toFixed(1);
 
-    return { winner, confidence, fairOdds, valuePercents };
+    return { winner, confidence, fairOdds, valuePercents, totalEstimate, handicap };
 }
 
 function clearInputs() {
@@ -151,3 +158,4 @@ function addInputFormatting(inputId, nextInputId) {
         }
     });
 }
+
