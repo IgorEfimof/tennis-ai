@@ -39,32 +39,44 @@ function analyzeGame() {
 
     const avg1 = (playerAvg.player1 / games.length).toFixed(2);
     const avg2 = (playerAvg.player2 / games.length).toFixed(2);
+
     const vp1 = valuePercents.player1.toFixed(1);
     const vp2 = valuePercents.player2.toFixed(1);
     const fair1 = fairOdds.player1.toFixed(2);
     const fair2 = fairOdds.player2.toFixed(2);
 
-    let resultHTML = winner ? `
-        <p style="color: green; font-weight: bold;">
-            🤖 Победитель: Игрок ${winner} (уверенность: ${confidence}%)
-        </p>` : `
-        <p style="color: green;">🤖 Недостаточно уверенности для прогноза.</p>`;
+    // Доп. рынки:
+    const totalPointsArr = games.map(g => g.player1 + g.player2);
+    const avgTotal = totalPointsArr.reduce((a, b) => a + b, 0) / games.length;
+    const totalLine = 18.5;
+    const totalPrediction = `${avgTotal.toFixed(1)} → ${avgTotal > totalLine ? 'Тотал Больше' : 'Тотал Меньше'} ${totalLine}`;
 
-    resultHTML += `
+    const spreads = games.map(g => g.player1 - g.player2);
+    const avgSpread = spreads.reduce((a, b) => a + b, 0) / spreads.length;
+    const handicapPrediction = `Фора ${avgSpread > 0 ? '-' : '+'}${Math.abs(avgSpread).toFixed(1)} на Игрока ${avgSpread > 0 ? '1' : '2'}`;
+
+    let evenCount = 0;
+    games.forEach(g => {
+        const total = g.player1 + g.player2;
+        if (total % 2 === 0) evenCount++;
+    });
+    const evenOrOdd = evenCount >= 4 ? `Чет (в ${evenCount} из 6 игр)` : `Нечет (в ${6 - evenCount} из 6 игр)`;
+
+    let resultHTML = `
+        <p style="color: green; font-weight: bold;">
+            🤖 Победитель: ${winner ? `Игрок ${winner} (уверенность: ${confidence}%)` : 'Недостаточно уверенности для прогноза'}
+        </p>
         <p>
             <strong>Средние коэффициенты:</strong> Игрок 1: ${avg1} | Игрок 2: ${avg2}<br>
             <strong>Справедливые коэффициенты (AI):</strong> Игрок 1: ${fair1} | Игрок 2: ${fair2}<br>
-            <strong>Value-переоценка:</strong> 
-            Игрок 1: ${vp1}% | Игрок 2: ${vp2}%
+            <strong>Value-переоценка:</strong> Игрок 1: ${vp1}% | Игрок 2: ${vp2}%
         </p>
-    `;
-
-    const extraMarkets = predictAdditionalMarkets(games);
-    resultHTML += `
         <p><strong>Доп. рынки:</strong></p>
-        <p>🏓 Тотал очков: ${extraMarkets.totalPrediction}</p>
-        <p>📈 Фора: ${extraMarkets.handicapPrediction}</p>
-        <p>⚖️ Чет/нечет: ${extraMarkets.evenOrOdd}</p>
+        <ul>
+            <li>🏓 <strong>Средний тотал:</strong> ${totalPrediction}</li>
+            <li>📈 <strong>Средняя фора:</strong> ${handicapPrediction}</li>
+            <li>⚖️ <strong>Чет/Нечет:</strong> ${evenOrOdd}</li>
+        </ul>
     `;
 
     document.getElementById("result").innerHTML = resultHTML;
@@ -113,28 +125,6 @@ function predictWinner(games) {
     return { winner, confidence, fairOdds, valuePercents };
 }
 
-function predictAdditionalMarkets(games) {
-    const totalPoints = games.reduce((sum, g) => sum + g.player1 + g.player2, 0);
-    const avgPoints = totalPoints / games.length;
-    const totalLine = 18.5;
-    const totalPrediction = avgPoints > totalLine ? 'Больше' : 'Меньше';
-
-    const spreads = games.map(g => g.player1 - g.player2);
-    const avgSpread = spreads.reduce((a, b) => a + b, 0) / spreads.length;
-
-    let handicapPrediction = 'Равная игра';
-    if (avgSpread > 1) handicapPrediction = 'Фора -1.5 на Игрока 1';
-    else if (avgSpread < -1) handicapPrediction = 'Фора -1.5 на Игрока 2';
-
-    const evenOrOdd = totalPoints % 2 === 0 ? 'Чет' : 'Нечет';
-
-    return {
-        totalPrediction,
-        handicapPrediction,
-        evenOrOdd
-    };
-}
-
 function clearInputs() {
     document.querySelectorAll("input").forEach(input => input.value = "");
     document.getElementById("result").innerHTML = "<p>Рекомендации будут здесь.</p>";
@@ -161,4 +151,3 @@ function addInputFormatting(inputId, nextInputId) {
         }
     });
 }
-
