@@ -1,27 +1,24 @@
 body {
     font-family: Arial, sans-serif;
     background-color: #f4f4f4;
-    margin: 0;
-    padding: 0;
-    color: #333;
+    padding: 20px;
 }
 
 .app-container {
-    max-width: 900px;
-    margin: 50px auto;
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: #fff;
     padding: 20px;
-    background-color: white;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 h1 {
     text-align: center;
-    color: #003366;
 }
 
-.input-section, .result-section {
-    margin-bottom: 20px;
+.input-section,
+.result-section {
+    margin-bottom: 30px;
 }
 
 .game-input {
@@ -30,37 +27,33 @@ h1 {
     margin-bottom: 10px;
 }
 
-input {
+.game-input input {
     width: 45%;
-    padding: 8px;
+    padding: 10px;
     font-size: 16px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
 }
 
 button {
     padding: 10px 20px;
-    background-color: #003366;
-    color: white;
-    border: none;
-    border-radius: 5px;
+    font-size: 16px;
     cursor: pointer;
-    margin-right: 10px;
+    background-color: #003366;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    margin-top: 10px;
 }
 
 button:hover {
-    background-color: #005bb5;
-}
-
-#result, #ai-prediction {
-    padding: 10px;
-    background-color: #e0e0e0;
-    border-radius: 5px;
+    background-color: #002a55;
 }
 
 #ai-prediction {
-    margin-top: 20px;
-    font-weight: bold;
+    color: green;
 }
 
-
+#result p {
+    font-size: 16px;
+}
