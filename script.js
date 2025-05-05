@@ -29,7 +29,7 @@ function analyzeGame() {
         games.push({ game: i, player1, player2 });
     }
 
-    const { winner, confidence, fairOdds, valuePercents, totalEstimate, handicap } = predictWinner(games);
+    const { winner, confidence, fairOdds, valuePercents } = predictWinner(games);
 
     if (!winner) {
         document.getElementById("result").innerHTML = `<p style="color: green;">🤖 Недостаточно уверенности для прогноза.</p>`;
@@ -58,16 +58,24 @@ function analyzeGame() {
         <p>
             <strong>Средние коэффициенты:</strong> Игрок 1: ${avg1} | Игрок 2: ${avg2}<br>
             <strong>Справедливые коэффициенты (AI):</strong> Игрок 1: ${fair1} | Игрок 2: ${fair2}<br>
-            <strong>Value-переоценка:</strong> Игрок 1: ${vp1}% | Игрок 2: ${vp2}%<br><br>
-            <strong>Доп. рынки (AI):</strong><br>
-            Ожидаемый тотал очков: <strong>${totalEstimate}</strong><br>
-            Рекомендуемая фора: <strong>${handicap}</strong>
+            <strong>Value-переоценка:</strong> 
+            Игрок 1: ${vp1}% | Игрок 2: ${vp2}%
         </p>
     `;
 
     document.getElementById("result").innerHTML = resultHTML;
     document.getElementById("ai-prediction").innerHTML = "";
     localStorage.setItem("lastAnalysis", resultHTML);
+
+    historyData.push({
+        avg1: parseFloat(avg1),
+        avg2: parseFloat(avg2),
+        fair1: parseFloat(fair1),
+        fair2: parseFloat(fair2),
+        value1: parseFloat(vp1),
+        value2: parseFloat(vp2)
+    });
+    renderChart();
 }
 
 function predictWinner(games) {
@@ -101,27 +109,6 @@ function predictWinner(games) {
         player2: ((avg2 - fairOdds.player2) / fairOdds.player2) * 100
     };
 
-    // Тотал очков (грубая оценка)
-    const totalEstimate = (
-        games.map(g => {
-            const p1 = 1 / g.player1;
-            const p2 = 1 / g.player2;
-            const t = 11 + Math.abs(p1 - p2) * 5;
-            return t;
-        }).reduce((a, b) => a + b, 0) / games.length
-    ).toFixed(1);
-
-    // Фора
-    const impDiff = Math.abs(imp1 - imp2);
-    let handicap;
-    if (impDiff < 0.05) {
-        handicap = "±1.5 (равные силы)";
-    } else if (impDiff < 0.15) {
-        handicap = "+3.5 на андердога";
-    } else {
-        handicap = "+5.5 на андердога";
-    }
-
     if (Math.abs(prob1 - prob2) < 0.05) {
         return { winner: null };
     }
@@ -129,7 +116,7 @@ function predictWinner(games) {
     const winner = prob1 > prob2 ? 1 : 2;
     const confidence = ((Math.max(prob1, prob2)) * 100).toFixed(1);
 
-    return { winner, confidence, fairOdds, valuePercents, totalEstimate, handicap };
+    return { winner, confidence, fairOdds, valuePercents };
 }
 
 function clearInputs() {
@@ -159,3 +146,81 @@ function addInputFormatting(inputId, nextInputId) {
     });
 }
 
+// ==== Chart.js визуализация ====
+let chartInstance = null;
+const historyData = [];
+
+function renderChart() {
+    const labels = historyData.map((_, i) => `Анализ ${i + 1}`);
+    const avg1Data = historyData.map(h => h.avg1);
+    const avg2Data = historyData.map(h => h.avg2);
+    const fair1Data = historyData.map(h => h.fair1);
+    const fair2Data = historyData.map(h => h.fair2);
+    const value1Data = historyData.map(h => h.value1);
+    const value2Data = historyData.map(h => h.value2);
+
+    const ctx = document.getElementById('chart').getContext('2d');
+
+    if (chartInstance) chartInstance.destroy();
+
+    chartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels,
+            datasets: [
+                {
+                    label: 'Коэф. Игрок 1',
+                    data: avg1Data,
+                    borderColor: 'blue',
+                    backgroundColor: 'blue',
+                    tension: 0.3
+                },
+                {
+                    label: 'Коэф. Игрок 2',
+                    data: avg2Data,
+                    borderColor: 'red',
+                    backgroundColor: 'red',
+                    tension: 0.3
+                },
+                {
+                    label: 'Справедл. Игрок 1',
+                    data: fair1Data,
+                    borderColor: 'blue',
+                    borderDash: [5, 5],
+                    tension: 0.3
+                },
+                {
+                    label: 'Справедл. Игрок 2',
+                    data: fair2Data,
+                    borderColor: 'red',
+                    borderDash: [5, 5],
+                    tension: 0.3
+                },
+                {
+                    label: 'Value Игрок 1 (%)',
+                    data: value1Data,
+                    borderColor: 'green',
+                    tension: 0.3
+                },
+                {
+                    label: 'Value Игрок 2 (%)',
+                    data: value2Data,
+                    borderColor: 'orange',
+                    tension: 0.3
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Значения'
+                    }
+                }
+            }
+        }
+    });
+}
