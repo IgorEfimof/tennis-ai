@@ -1,59 +1,64 @@
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f1f1f1;
-    color: #000;
+    background: linear-gradient(to bottom, #000000, #003366); /* Градиент от черного к темно-синему */
+    color: white; /* Белый текст для читаемости */
+    font-family: Arial, sans-serif; /* Общий шрифт */
     margin: 0;
     padding: 0;
 }
 
 .app-container {
-    max-width: 600px;
-    margin: 30px auto;
     padding: 20px;
-    background-color: white;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    border-radius: 10px;
 }
 
 h1, h2 {
-    text-align: center;
-}
-
-.input-section {
-    margin-bottom: 20px;
-}
-
-.game-input {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 10px;
-}
-
-.game-input input {
-    width: 48%;
-    padding: 8px;
-    font-size: 16px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+    color: white; /* Цвет заголовков для контраста */
 }
 
 button {
-    width: 100%;
-    padding: 10px;
-    margin-top: 10px;
-    font-size: 16px;
-    background-color: #006400;
+    background-color: #004d80; /* Темно-синий для кнопок */
     color: white;
     border: none;
-    border-radius: 5px;
+    padding: 10px 20px;
+    font-size: 16px;
     cursor: pointer;
+    border-radius: 5px;
+    margin: 5px;
 }
 
 button:hover {
-    background-color: #004d00;
+    background-color: #0066cc; /* Светлее при наведении */
 }
 
-.result-section {
+.input-section, .result-section {
+    background: rgba(0, 0, 0, 0.8); /* Полупрозрачный черный фон */
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+input[type="text"] {
+    background: #333333; /* Темный фон для полей ввода */
+    color: #ffffff; /* Белый текст */
+    border: 1px solid #555555;
+    padding: 10px;
+    border-radius: 5px;
+    margin: 5px;
+    width: calc(50% - 14px); /* Две колонки */
+    box-sizing: border-box;
+}
+
+input[type="text"]::placeholder {
+    color: #aaaaaa; /* Светлый текст для подсказок */
+}
+
+input[type="text"]:focus {
+    border-color: #0066cc; /* Подсветка при фокусе */
+    outline: none;
+}
+
+#ai-prediction {
+    font-size: 18px;
+    font-weight: bold;
+    color: green; /* Зеленый текст для прогноза AI */
     margin-top: 20px;
 }
-
