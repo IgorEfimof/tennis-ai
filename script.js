@@ -13,13 +13,20 @@ document.querySelectorAll(".auto-format").forEach(input => {
         this.value = value;
 
         if (value.length === 4) {
-            const nextInput = this.closest(".game-input").nextElementSibling?.querySelector(".auto-format");
-            if (nextInput) {
-                nextInput.focus(); // Переход к следующему полю
+            const oppositeInput = getOppositeInput(this); // Получаем поле напротив
+            if (oppositeInput) {
+                oppositeInput.focus(); // Переход к полю напротив
             }
         }
     });
 });
+
+function getOppositeInput(currentInput) {
+    const inputsContainer = currentInput.closest(".game-input");
+    const allInputs = Array.from(inputsContainer.querySelectorAll(".auto-format"));
+    const currentIndex = allInputs.indexOf(currentInput);
+    return allInputs[(currentIndex + 1) % 2]; // Переход на противоположное поле
+}
 
 function analyzeGame() {
     const games = [];
