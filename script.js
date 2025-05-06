@@ -3,6 +3,24 @@ document.getElementById("clear-btn").addEventListener("click", clearInputs);
 document.getElementById("win-btn").addEventListener("click", () => saveResult(true));
 document.getElementById("lose-btn").addEventListener("click", () => saveResult(false));
 
+// Автоформатирование и переход
+document.querySelectorAll(".auto-format").forEach(input => {
+    input.addEventListener("input", function () {
+        let value = this.value.replace(/[^0-9]/g, ""); // Убираем все, кроме цифр
+        if (value.length === 1) {
+            value = `${value}.`; // Автоматически добавляем точку после первой цифры
+        }
+        this.value = value;
+
+        if (value.length === 4) {
+            const nextInput = this.closest(".game-input").nextElementSibling?.querySelector(".auto-format");
+            if (nextInput) {
+                nextInput.focus(); // Переход к следующему полю
+            }
+        }
+    });
+});
+
 function analyzeGame() {
     const games = [];
     for (let i = 5; i <= 10; i++) {
