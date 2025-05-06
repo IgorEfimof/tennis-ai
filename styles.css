@@ -1,13 +1,16 @@
-body {
+html, body {
+    margin: 0; /* Убираем отступы */
+    padding: 0; /* Убираем поля */
+    height: 100%; /* Устанавливаем высоту на 100% */
     background: linear-gradient(to bottom, #000000, #003366); /* Градиент от черного к темно-синему */
     color: white; /* Белый текст для читаемости */
     font-family: Arial, sans-serif; /* Общий шрифт */
-    margin: 0;
-    padding: 0;
 }
 
 .app-container {
     padding: 20px;
+    min-height: 100vh; /* Минимальная высота экрана */
+    box-sizing: border-box; /* Учитываем padding в расчётах ширины и высоты */
 }
 
 h1, h2 {
